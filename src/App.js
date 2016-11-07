@@ -1,17 +1,19 @@
 import React, { Component } from 'react';
 import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
-import faunadb, { Ref, query as q } from 'faunadb';
+import faunadb from 'faunadb';
 import logo from './logo.svg';
 import './App.css';
+
+// console.log("faunadb", faunadb)
+
+const q = faunadb.query, Ref = q.Ref;
 
 var adminClient = new faunadb.Client({
   secret: "kqnPAhIHLuvwAAK0qP95OuNIjADeI9uLJzMWexUdisY"
 });
 
-function getFaunaInfo() {
-  adminClient.query(q.Create(Ref("databases"), { name: "console_test" })).then(function (response) {
-    console.log(response)
-  })
+function getMyDatabases() {
+  return adminClient.query(q.Paginate(Ref("databases")))
 }
 
 class App extends Component {
@@ -54,11 +56,31 @@ const Home = () =>(
   </div>
 );
 
-const Databases = () => (
-  <div className="Databases">
-    <p>We found this:</p>
-  </div>
-);
+class Databases extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {databases:[]};
+  }
+  componentDidMount() {
+    console.log("getFaunaInfo")
+    getMyDatabases().then( (res) => {
+      this.setState({databases : res.data})
+    })
+  }
+  render() {
+    console.log(this.state)
+    return (
+      <div className="Databases">
+        <p>We found:</p>
+        <ul>
+          {this.state.databases.map((db) => {
+            return <li key={db.value}><Link to={db.value}>{db.value}</Link></li>;
+          })}
+        </ul>
+      </div>
+    );
+  }
+}
 
 const NotFound = () => (<h1>404.. This page is not found!</h1>);
 
