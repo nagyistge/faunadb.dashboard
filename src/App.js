@@ -9,12 +9,8 @@ import './App.css';
 const q = faunadb.query, Ref = q.Ref;
 
 var adminClient = new faunadb.Client({
-  secret: "kqnPAhIHLuvwAAK0qP95OuNIjADeI9uLJzMWexUdisY"
+  secret: "kqnPAhIL7IwQAAG0dxzfrCOe7Ql6atqe83k-s2phoQ0"
 });
-
-function getMyDatabases() {
-  return adminClient.query(q.Paginate(Ref("databases")))
-}
 
 class App extends Component {
   render() {
@@ -23,6 +19,7 @@ class App extends Component {
         <Route path='/' component={Container}>
           <IndexRoute component={Home} />
             <Route path='/databases' component={Databases} />
+            <Route path='/classes' component={DatabaseClasses} />
           <Route path='*' component={NotFound} />
         </Route>
       </Router>
@@ -34,20 +31,70 @@ const Nav = () => (
   <div>
     <Link to='/'>Home</Link>&nbsp;
     <Link to="/databases">Databases</Link>
+    <Link to="/classes">Classes</Link>
+
   </div>
 )
 
-const Container = (props) => (
-  <div className="App">
-    <div className="App-header">
-      <img src={logo} className="App-logo" alt="logo" />
-      <Nav />
-    </div>
-    <p className="App-intro">
-      {props.children}
-    </p>
-  </div>
-);
+class SecretForm extends Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.state = {value:""};
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  handleSubmit(event) {
+    // console.log('Secret is: ' + this.state.value);
+    event.preventDefault();
+    this.props.onSubmit(this.state.value)
+  }
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <input type="password" value={this.state.value} onChange={this.handleChange}/>
+      </form>
+    )
+  }
+}
+
+class Container extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {client:false};
+    this.updateSecret = this.updateSecret.bind(this);
+  }
+  updateSecret(secret) {
+    console.log('Secret is: ' + secret);
+    // get a new client for that secret and set state
+    var clientForSecret = new faunadb.Client({
+      secret: secret
+    });
+    this.setState({client : clientForSecret});
+  }
+  render() {
+    const childrenWithProps = React.Children.map(this.props.children,
+     (child) => React.cloneElement(child, {
+       client: this.state.client
+     })
+    );
+    return (
+      <div className="App">
+        <div className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+          <SecretForm onSubmit={this.updateSecret} />
+          <Nav />
+        </div>
+        <div className="App-intro">
+          {childrenWithProps}
+        </div>
+      </div>
+    )
+  }
+}
+
 
 const Home = () =>(
   <div>
@@ -63,7 +110,7 @@ class Databases extends Component {
   }
   componentDidMount() {
     console.log("getFaunaInfo")
-    getMyDatabases().then( (res) => {
+    this.props.client.query(q.Paginate(Ref("databases"))).then( (res) => {
       this.setState({databases : res.data})
     })
   }
@@ -74,6 +121,31 @@ class Databases extends Component {
         <p>We found:</p>
         <ul>
           {this.state.databases.map((db) => {
+            return <li key={db.value}><Link to={db.value}>{db.value}</Link></li>;
+          })}
+        </ul>
+      </div>
+    );
+  }
+}
+
+class DatabaseClasses extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {classes:[]};
+  }
+  componentDidMount() {
+    this.props.client.query(q.Paginate(Ref("classes"))).then( (res) => {
+      this.setState({classes : res.data})
+    })
+  }
+  render() {
+    console.log(this.state)
+    return (
+      <div className="DatabaseClasses">
+        <p>We found classes:</p>
+        <ul>
+          {this.state.classes.map((db) => {
             return <li key={db.value}><Link to={db.value}>{db.value}</Link></li>;
           })}
         </ul>
