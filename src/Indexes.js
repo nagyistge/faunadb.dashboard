@@ -76,6 +76,7 @@ class IndexQuery extends Component {
     this.state = {};
   }
   gotTerm(term) {
+    console.log("Got Term", term)
     this.setState({term})
   }
   render() {
@@ -103,6 +104,8 @@ class QueryResult extends Component {
   constructor(props) {
     super(props);
     this.state = {result:{data:[]}};
+    this.clickedRef = this.clickedRef.bind(this);
+
   }
   componentDidMount() {
     this.getIndexRows(this.props.info.name, this.props.term);
@@ -126,15 +129,48 @@ class QueryResult extends Component {
       this.setState({result : res})
     })
   }
+  clickedRef(item) {
+
+    console.log("clickedRef",item, this)
+    this.setState({instanceRef:item});
+  }
   render() {
     return (<div>
         <h2>Query Results</h2>
         <ul>
           {this.state.result.data.map((item)=>{
-            return <li>{JSON.stringify(item, null, 2)}</li>
+            console.log(item)
+            return <li key={item.value} onClick={this.clickedRef.bind(null, item)}>{JSON.stringify(item, null, 2)}</li>
           })}
         </ul>
-      {JSON.stringify(this.state.result, null, 2)}
+        <InstancePreview client={this.props.client} instanceRef={this.state.instanceRef}/>
+      </div>)
+  }
+}
+
+class InstancePreview extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {instance:{}};
+  }
+  componentDidMount() {
+    this.getInstanceData(this.props.instanceRef);
+  }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.instanceRef !== nextProps.instanceRef) {
+      this.getInstanceData(nextProps.instanceRef)
+    }
+  }
+  getInstanceData(instanceRef) {
+    console.log("getInstanceData", instanceRef)
+    this.props.client.query(q.Get(Ref(instanceRef))).then((res) => {
+      this.setState({instance : res})
+    })
+  }
+  render() {
+    return (<div>
+        <h3>Instance Preview</h3>
+        <pre>{JSON.stringify(this.state.instance)}</pre>
       </div>)
   }
 }
@@ -151,7 +187,20 @@ class TermForm extends Component {
   }
   handleSubmit(event) {
     event.preventDefault();
-    this.props.onSubmit(this.state.value)
+    var parsed, value = this.state.value;
+    console.log("term form submit", value)
+    try {
+      parsed = JSON.parse(value);
+      console.log("term form parsed", parsed)
+
+      if (parsed["@ref"]) {
+        value = q.Ref(parsed["@ref"])
+      }
+    } catch(e) {
+      // not JSON
+    }
+    console.log("term form value", value)
+    this.props.onSubmit(value);
   }
   render() {
     return (
