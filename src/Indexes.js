@@ -44,9 +44,7 @@ export class IndexInfo extends Component {
   constructor(props) {
     super(props);
     this.state = {info:{
-      source:{},
-      terms :[],
-      values : []
+      source:{}
     }};
   }
   componentDidMount() {
@@ -63,10 +61,140 @@ export class IndexInfo extends Component {
     }
   }
   render() {
-    var info = this.state.info;
+
+    return (<div>
+        <IndexCard client={this.props.client} info={this.state.info}/>
+        <IndexQuery client={this.props.client} info={this.state.info}/>
+      </div>)
+  }
+}
+
+class IndexQuery extends Component {
+  constructor(props) {
+    super(props);
+    this.gotTerm = this.gotTerm.bind(this);
+    this.state = {};
+  }
+  gotTerm(term) {
+    this.setState({term})
+  }
+  render() {
+    var termInfo, queryResults;
+    if (this.props.info.terms) {
+      // get a term
+      termInfo = <TermForm onSubmit={this.gotTerm}/>;
+        if (this.state.term) {
+          queryResults = <QueryResult client={this.props.client} info={this.props.info} term={this.state.term}/>
+        } else {
+          // no query
+        }
+    } else {
+      // run a termless query
+      termInfo = <p>Class index for {this.props.info.source.value}</p>;
+      queryResults = <QueryResult client={this.props.client} info={this.props.info} />
+    }
+    return (<div>
+      {termInfo}
+      {queryResults}
+    </div>);
+  }
+}
+class QueryResult extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {result:{data:[]}};
+  }
+  componentDidMount() {
+    this.getIndexRows(this.props.info.name, this.props.term);
+  }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.info.name !== nextProps.info.name ||
+      this.props.term !== nextProps.term) {
+      this.getIndexRows(nextProps.info.name, nextProps.term)
+    }
+  }
+  getIndexRows(name, term) {
+    console.log("get rows for", name, term)
+    if (!name) return;
+    var query;
+    if (term) {
+      query = q.Paginate(q.Match(Ref("indexes/"+name), term))
+    } else {
+      query = q.Paginate(q.Match(Ref("indexes/"+name)))
+    }
+    this.props.client.query(query).then((res) => {
+      this.setState({result : res})
+    })
+  }
+  render() {
+    return (<div>
+        <h2>Query Results</h2>
+        <ul>
+          {this.state.result.data.map((item)=>{
+            return <li>{JSON.stringify(item, null, 2)}</li>
+          })}
+        </ul>
+      {JSON.stringify(this.state.result, null, 2)}
+      </div>)
+  }
+}
+
+class TermForm extends Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.state = {value:""};
+  }
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+  handleSubmit(event) {
+    event.preventDefault();
+    this.props.onSubmit(this.state.value)
+  }
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        Index term: <input type="text" value={this.state.value} onChange={this.handleChange}/>
+      </form>
+    )
+  }
+}
+
+class IndexCard extends Component {
+  render() {
+    var info = this.props.info;
     var active = info.active;
     var unique = info.unique;
     console.log("info",info)
+    var termsMarkup = info.terms && <div>
+      <dt>Terms</dt>
+      <dd>
+        <dl>
+          {info.terms.map((t, i)=>{
+            return (<div key={i}>
+              <dt>Field</dt>
+              <dd>{JSON.stringify(t.field)}</dd>
+            </div>)
+          })}
+        </dl>
+      </dd>
+    </div>;
+    var valuesMarkup = info.values && <div>
+      <dt>Values</dt>
+      <dd>
+        <dl>
+          {info.values.map((t, i)=>{
+            return (<div key={i}>
+              <dt>Field</dt>
+              <dd>{JSON.stringify(t.field)}</dd>
+            </div>)
+          })}
+        </dl>
+      </dd>
+    </div>;
+
     return (
       <div className="IndexInfo">
         <dl>
@@ -75,28 +203,8 @@ export class IndexInfo extends Component {
           <dt>Unique</dt><dd>{unique ? "true" : "false"}</dd>
           <dt>Partitions</dt><dd>{info.partitions}</dd>
           <dt>Source</dt><dd>{info.source.value}</dd>
-          <dt>Terms</dt>
-          <dd>
-            <dl>
-              {info.terms.map((t, i)=>{
-                return (<div key={i}>
-                  <dt>Field</dt>
-                  <dd>{JSON.stringify(t.field)}</dd>
-                </div>)
-              })}
-            </dl>
-          </dd>
-          <dt>Values</dt>
-          <dd>
-            <dl>
-              {info.values.map((t, i)=>{
-                return (<div key={i}>
-                  <dt>Field</dt>
-                  <dd>{JSON.stringify(t.field)}</dd>
-                </div>)
-              })}
-            </dl>
-          </dd>
+          {termsMarkup}
+          {valuesMarkup}
         </dl>
 
         <p>Debug info:</p>
