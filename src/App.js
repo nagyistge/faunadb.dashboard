@@ -12,14 +12,22 @@ var adminClient = new faunadb.Client({
   secret: "kqnPAhIL7IwQAAG0dxzfrCOe7Ql6atqe83k-s2phoQ0"
 });
 
+var serverClient = new faunadb.Client({
+  secret : "kqnPAhRJFfUwAAK04RVasFRTTV3rJxptEiWOhKJSbO4"
+})
+
 class App extends Component {
   render() {
     return (
       <Router history={hashHistory}>
         <Route path='/' component={Container}>
           <IndexRoute component={Home} />
-            <Route path='/databases' component={Databases} />
-            <Route path='/classes' component={DatabaseClasses} />
+          <Route path='/databases' component={Databases} />
+          <Route path='/classes' component={DatabaseClasses} />
+          <Route path='/indexes' component={Indexes}>
+            <IndexRoute component={IndexHome} />
+            <Route path='/indexes/:name' component={IndexInfo}/>
+          </Route>
           <Route path='*' component={NotFound} />
         </Route>
       </Router>
@@ -32,7 +40,7 @@ const Nav = () => (
     <Link to='/'>Home</Link>&nbsp;
     <Link to="/databases">Databases</Link>
     <Link to="/classes">Classes</Link>
-
+    <Link to="/indexes">Indexes</Link>
   </div>
 )
 
@@ -95,7 +103,6 @@ class Container extends Component {
   }
 }
 
-
 const Home = () =>(
   <div>
     To get started, edit <code>src/App.js</code> and save to reload.
@@ -112,6 +119,8 @@ class Databases extends Component {
     console.log("getFaunaInfo")
     this.props.client.query(q.Paginate(Ref("databases"))).then( (res) => {
       this.setState({databases : res.data})
+    }).catch(function (res) {
+      console.log(res)
     })
   }
   render() {
@@ -149,6 +158,65 @@ class DatabaseClasses extends Component {
             return <li key={db.value}><Link to={db.value}>{db.value}</Link></li>;
           })}
         </ul>
+      </div>
+    );
+  }
+}
+
+class Indexes extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {indexes:[]};
+  }
+  componentDidMount() {
+    this.props.client.query(q.Paginate(Ref("indexes"))).then( (res) => {
+      this.setState({indexes : res.data})
+    })
+  }
+  render() {
+    const childrenWithProps = React.Children.map(this.props.children,
+     (child) => React.cloneElement(child, {
+       client: this.props.client
+     })
+    );
+    console.log(this.state)
+    return (
+      <div className="Indexes">
+        <p>We found indexes:</p>
+        <ul>
+          {this.state.indexes.map((row) => {
+            return <li key={row.value}><Link to={row.value}>{row.value}</Link></li>;
+          })}
+        </ul>
+        {childrenWithProps}
+      </div>
+    );
+  }
+}
+
+const IndexHome = () =>(
+  <div>
+    Select an index for more information about it.
+  </div>
+);
+
+class IndexInfo extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {info:{}};
+  }
+  componentDidMount() {
+    console.log("componentDidMount",this.props)
+    this.props.client.query(q.Get(Ref("indexes/"+this.props.params.name))).then( (res) => {
+      this.setState({info : res})
+    })
+  }
+  render() {
+    console.log(this.state)
+    return (
+      <div className="IndexInfo">
+        <p>Index info:</p>
+        <pre>{JSON.stringify(this.state.info, null, 2)}</pre>
       </div>
     );
   }
