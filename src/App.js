@@ -4,18 +4,9 @@ import faunadb from 'faunadb';
 import logo from './logo.svg';
 import './App.css';
 import {Indexes, IndexHome, IndexInfo} from './Indexes'
-
-// console.log("faunadb", faunadb)
+import {Classes, ClassesHome, ClassInfo} from './Classes'
 
 const q = faunadb.query, Ref = q.Ref;
-
-var adminClient = new faunadb.Client({
-  secret: "kqnPAhIL7IwQAAG0dxzfrCOe7Ql6atqe83k-s2phoQ0"
-});
-
-var serverClient = new faunadb.Client({
-  secret : "kqnPAhRJFfUwAAK04RVasFRTTV3rJxptEiWOhKJSbO4"
-})
 
 class App extends Component {
   render() {
@@ -24,7 +15,10 @@ class App extends Component {
         <Route path='/' component={Container}>
           <IndexRoute component={Home} />
           <Route path='/databases' component={Databases} />
-          <Route path='/classes' component={DatabaseClasses} />
+          <Route path='/classes' component={Classes}>
+            <IndexRoute component={ClassesHome} />
+            <Route path='/classes/:name' component={ClassInfo}/>
+          </Route>
           <Route path='/indexes' component={Indexes}>
             <IndexRoute component={IndexHome} />
             <Route path='/indexes/:name' component={IndexInfo}/>
@@ -117,7 +111,6 @@ class Databases extends Component {
     this.state = {databases:[]};
   }
   componentDidMount() {
-    console.log("getFaunaInfo")
     this.props.client.query(q.Paginate(Ref("databases"))).then( (res) => {
       this.setState({databases : res.data})
     }).catch(function (res) {
@@ -139,30 +132,7 @@ class Databases extends Component {
   }
 }
 
-class DatabaseClasses extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {classes:[]};
-  }
-  componentDidMount() {
-    this.props.client.query(q.Paginate(Ref("classes"))).then( (res) => {
-      this.setState({classes : res.data})
-    })
-  }
-  render() {
-    console.log(this.state)
-    return (
-      <div className="DatabaseClasses">
-        <p>We found classes:</p>
-        <ul>
-          {this.state.classes.map((db) => {
-            return <li key={db.value}><Link to={db.value}>{db.value}</Link></li>;
-          })}
-        </ul>
-      </div>
-    );
-  }
-}
+
 
 
 const NotFound = () => (<h1>404.. This page is not found!</h1>);
