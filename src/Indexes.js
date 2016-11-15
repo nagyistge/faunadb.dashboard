@@ -47,16 +47,34 @@ export class IndexInfo extends Component {
   }
   componentDidMount() {
     console.log("componentDidMount",this.props)
-    this.props.client.query(q.Get(Ref("indexes/"+this.props.params.name))).then( (res) => {
+    this.getIndexInfo(this.props.params.name)
+  }
+  getIndexInfo(name) {
+    this.props.client.query(q.Get(Ref("indexes/"+name))).then( (res) => {
       this.setState({info : res})
     })
   }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.params.name !== nextProps.params.name) {
+      this.getIndexInfo(nextProps.params.name)
+    }
+  }
   render() {
+    var info = this.state.info;
+    var active = !!info.active;
+    var unique = !!info.unique;
     console.log(this.state)
     return (
       <div className="IndexInfo">
+        <dl>
+          <dt>Name</dt><dd>{info.name}</dd>
+          <dt>Active</dt><dd>{active && "true"}</dd>
+          <dt>Unique</dt><dd>{unique && "true"}</dd>
+        </dl>
+        <h4>Name</h4>
+
         <p>Index info:</p>
-        <pre>{JSON.stringify(this.state.info, null, 2)}</pre>
+        <pre>{JSON.stringify(info, null, 2)}</pre>
       </div>
     );
   }

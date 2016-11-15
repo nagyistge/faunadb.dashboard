@@ -50,7 +50,7 @@ class SecretForm extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.state = {value:""};
+    this.state = {value:"kqnPAhRJFfUwAAK04RVasFRTTV3rJxptEiWOhKJSbO4"};
   }
   handleChange(event) {
     this.setState({value: event.target.value});
