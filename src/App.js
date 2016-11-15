@@ -3,6 +3,7 @@ import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 're
 import faunadb from 'faunadb';
 import logo from './logo.svg';
 import './App.css';
+import {Indexes, IndexHome, IndexInfo} from './Indexes'
 
 // console.log("faunadb", faunadb)
 
@@ -163,64 +164,6 @@ class DatabaseClasses extends Component {
   }
 }
 
-class Indexes extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {indexes:[]};
-  }
-  componentDidMount() {
-    this.props.client.query(q.Paginate(Ref("indexes"))).then( (res) => {
-      this.setState({indexes : res.data})
-    })
-  }
-  render() {
-    const childrenWithProps = React.Children.map(this.props.children,
-     (child) => React.cloneElement(child, {
-       client: this.props.client
-     })
-    );
-    console.log(this.state)
-    return (
-      <div className="Indexes">
-        <p>We found indexes:</p>
-        <ul>
-          {this.state.indexes.map((row) => {
-            return <li key={row.value}><Link to={row.value}>{row.value}</Link></li>;
-          })}
-        </ul>
-        {childrenWithProps}
-      </div>
-    );
-  }
-}
-
-const IndexHome = () =>(
-  <div>
-    Select an index for more information about it.
-  </div>
-);
-
-class IndexInfo extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {info:{}};
-  }
-  componentDidMount() {
-    console.log("componentDidMount",this.props)
-    this.props.client.query(q.Get(Ref("indexes/"+this.props.params.name))).then( (res) => {
-      this.setState({info : res})
-    })
-  }
-  render() {
-    console.log(this.state)
-    return (
-      <div className="IndexInfo">
-        <p>Index info:</p>
-        <pre>{JSON.stringify(this.state.info, null, 2)}</pre>
-      </div>
-    );
-  }
-}
 
 const NotFound = () => (<h1>404.. This page is not found!</h1>);
 
