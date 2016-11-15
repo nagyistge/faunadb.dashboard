@@ -43,10 +43,13 @@ export const IndexHome = () =>(
 export class IndexInfo extends Component {
   constructor(props) {
     super(props);
-    this.state = {info:{}};
+    this.state = {info:{
+      source:{},
+      terms :[],
+      values : []
+    }};
   }
   componentDidMount() {
-    console.log("componentDidMount",this.props)
     this.getIndexInfo(this.props.params.name)
   }
   getIndexInfo(name) {
@@ -61,19 +64,42 @@ export class IndexInfo extends Component {
   }
   render() {
     var info = this.state.info;
-    var active = !!info.active;
-    var unique = !!info.unique;
-    console.log(this.state)
+    var active = info.active;
+    var unique = info.unique;
+    console.log("info",info)
     return (
       <div className="IndexInfo">
         <dl>
           <dt>Name</dt><dd>{info.name}</dd>
-          <dt>Active</dt><dd>{active && "true"}</dd>
-          <dt>Unique</dt><dd>{unique && "true"}</dd>
+          <dt>Active</dt><dd>{active ? "true" : "false"}</dd>
+          <dt>Unique</dt><dd>{unique ? "true" : "false"}</dd>
+          <dt>Partitions</dt><dd>{info.partitions}</dd>
+          <dt>Source</dt><dd>{info.source.value}</dd>
+          <dt>Terms</dt>
+          <dd>
+            <dl>
+              {info.terms.map((t, i)=>{
+                return (<div key={i}>
+                  <dt>Field</dt>
+                  <dd>{JSON.stringify(t.field)}</dd>
+                </div>)
+              })}
+            </dl>
+          </dd>
+          <dt>Values</dt>
+          <dd>
+            <dl>
+              {info.values.map((t, i)=>{
+                return (<div key={i}>
+                  <dt>Field</dt>
+                  <dd>{JSON.stringify(t.field)}</dd>
+                </div>)
+              })}
+            </dl>
+          </dd>
         </dl>
-        <h4>Name</h4>
 
-        <p>Index info:</p>
+        <p>Debug info:</p>
         <pre>{JSON.stringify(info, null, 2)}</pre>
       </div>
     );
