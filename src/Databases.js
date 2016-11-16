@@ -9,7 +9,7 @@ export class Databases extends Component {
     this.state = {databases:[]};
   }
   componentDidMount() {
-    this.props.client.query(q.Paginate(Ref("databases"))).then( (res) => {
+    this.props.client && this.props.client.query(q.Paginate(Ref("databases"))).then( (res) => {
       this.setState({databases : res.data})
     }).catch(function (res) {
       console.log(res)

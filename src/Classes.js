@@ -18,7 +18,7 @@ export class Classes extends Component {
     }
   }
   getClasses(client) {
-    client.query(q.Paginate(Ref("classes"))).then( (res) => {
+    client && client.query(q.Paginate(Ref("classes"))).then( (res) => {
       this.setState({classes : res.data})
     })
   }
@@ -68,7 +68,7 @@ export class ClassInfo extends Component {
   }
   getClassInfo(client, name) {
     console.log("getClassInfo", name)
-    client.query(q.Get(Ref("classes/"+name))).then( (res) => {
+    client && client.query(q.Get(Ref("classes/"+name))).then( (res) => {
       this.setState({info : res})
     })
   }
@@ -98,7 +98,7 @@ class ClassIndexes extends Component {
   queryForIndexes(client, classRef) {
     var refName = classRef.value;
     console.log("queryForIndexes", refName)
-    client.query(q.Filter(q.Map(q.Paginate(Ref("indexes")), function (indexRef) {
+    client && client.query(q.Filter(q.Map(q.Paginate(Ref("indexes")), function (indexRef) {
       return q.Get(indexRef)
     }), function (indexInstance) {
       return q.Equals(q.Ref(refName), q.Select("source", indexInstance));

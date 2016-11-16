@@ -12,7 +12,7 @@ export class Indexes extends Component {
     this.getIndexes(this.props.client)
   }
   getIndexes(client) {
-    client.query(q.Paginate(Ref("indexes"))).then( (res) => {
+    client && client.query(q.Paginate(Ref("indexes"))).then( (res) => {
       this.setState({indexes : res.data})
     })
   }
@@ -59,7 +59,7 @@ export class IndexInfo extends Component {
     this.getIndexInfo(this.props.client, this.props.params.name)
   }
   getIndexInfo(client, name) {
-    client.query(q.Get(Ref("indexes/"+name))).then( (res) => {
+    client && client.query(q.Get(Ref("indexes/"+name))).then( (res) => {
       this.setState({info : res})
     })
   }
@@ -133,12 +133,11 @@ class QueryResult extends Component {
     } else {
       query = q.Paginate(q.Match(Ref("indexes/"+name)))
     }
-    this.props.client.query(query).then((res) => {
+    this.props.client && this.props.client.query(query).then((res) => {
       this.setState({result : res})
     })
   }
   clickedRef(item) {
-
     console.log("clickedRef",item, this)
     this.setState({instanceRef:item});
   }
@@ -171,7 +170,7 @@ class InstancePreview extends Component {
   }
   getInstanceData(instanceRef) {
     console.log("getInstanceData", instanceRef)
-    this.props.client.query(q.Get(Ref(instanceRef))).then((res) => {
+    this.props.client && this.props.client.query(q.Get(Ref(instanceRef))).then((res) => {
       this.setState({instance : res})
     })
   }
@@ -196,18 +195,12 @@ class TermForm extends Component {
   handleSubmit(event) {
     event.preventDefault();
     var parsed, value = this.state.value;
-    console.log("term form submit", value)
     try {
       parsed = JSON.parse(value);
-      console.log("term form parsed", parsed)
-
       if (parsed["@ref"]) {
         value = q.Ref(parsed["@ref"])
       }
-    } catch(e) {
-      // not JSON
-    }
-    console.log("term form value", value)
+    } catch(e) {} // not JSON
     this.props.onSubmit(value);
   }
   render() {
