@@ -5,6 +5,7 @@ import logo from './logo.svg';
 import './App.css';
 import {Indexes, IndexHome, IndexInfo} from './Indexes'
 import {Classes, ClassesHome, ClassInfo} from './Classes'
+import {Databases} from './Databases'
 
 const q = faunadb.query, Ref = q.Ref;
 
@@ -107,36 +108,6 @@ const Home = () =>(
       Find <Link to="/databases">databases</Link>
   </div>
 );
-
-class Databases extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {databases:[]};
-  }
-  componentDidMount() {
-    this.props.client.query(q.Paginate(Ref("databases"))).then( (res) => {
-      this.setState({databases : res.data})
-    }).catch(function (res) {
-      console.log(res)
-    })
-  }
-  render() {
-    console.log(this.state)
-    return (
-      <div className="Databases">
-        <p>We found:</p>
-        <ul>
-          {this.state.databases.map((db) => {
-            return <li key={db.value}><Link to={db.value}>{db.value}</Link></li>;
-          })}
-        </ul>
-      </div>
-    );
-  }
-}
-
-
-
 
 const NotFound = () => (<h1>404.. This page is not found!</h1>);
 
