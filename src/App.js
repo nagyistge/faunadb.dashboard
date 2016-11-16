@@ -33,9 +33,10 @@ class App extends Component {
 const Nav = () => (
   <div>
     <Link to='/'>Home</Link>&nbsp;
-    <Link to="/databases">Databases</Link>
-    <Link to="/classes">Classes</Link>
-    <Link to="/indexes">Indexes</Link>
+    <Link to="/databases">Databases</Link>&nbsp;
+    <Link to="/classes">Classes</Link>&nbsp;
+    <Link to="/indexes">Indexes</Link>&nbsp;
+    <Link to="/instances">Instances</Link>
   </div>
 )
 
@@ -58,6 +59,7 @@ class SecretForm extends Component {
     return (
       <form onSubmit={this.handleSubmit}>
         <input type="password" value={this.state.value} onChange={this.handleChange}/>
+        <input type="submit"/>
       </form>
     )
   }
@@ -78,6 +80,7 @@ class Container extends Component {
     this.setState({client : clientForSecret});
   }
   render() {
+    console.log("render Container")
     const childrenWithProps = React.Children.map(this.props.children,
      (child) => React.cloneElement(child, {
        client: this.state.client

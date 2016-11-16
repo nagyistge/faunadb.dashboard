@@ -9,9 +9,17 @@ export class Indexes extends Component {
     this.state = {indexes:[]};
   }
   componentDidMount() {
-    this.props.client.query(q.Paginate(Ref("indexes"))).then( (res) => {
+    this.getIndexes(this.props.client)
+  }
+  getIndexes(client) {
+    client.query(q.Paginate(Ref("indexes"))).then( (res) => {
       this.setState({indexes : res.data})
     })
+  }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.client !==  nextProps.client) {
+      this.getIndexes(nextProps.client)
+    }
   }
   render() {
     const childrenWithProps = React.Children.map(this.props.children,
@@ -48,20 +56,20 @@ export class IndexInfo extends Component {
     }};
   }
   componentDidMount() {
-    this.getIndexInfo(this.props.params.name)
+    this.getIndexInfo(this.props.client, this.props.params.name)
   }
-  getIndexInfo(name) {
-    this.props.client.query(q.Get(Ref("indexes/"+name))).then( (res) => {
+  getIndexInfo(client, name) {
+    client.query(q.Get(Ref("indexes/"+name))).then( (res) => {
       this.setState({info : res})
     })
   }
   componentWillReceiveProps(nextProps) {
-    if (this.props.params.name !== nextProps.params.name) {
-      this.getIndexInfo(nextProps.params.name)
+    if (this.props.params.name !== nextProps.params.name ||
+      this.props.client !== nextProps.client) {
+      this.getIndexInfo(nextProps.client, nextProps.params.name)
     }
   }
   render() {
-
     return (<div>
         <IndexCard client={this.props.client} info={this.state.info}/>
         <IndexQuery client={this.props.client} info={this.state.info}/>
@@ -251,7 +259,7 @@ class IndexCard extends Component {
           <dt>Active</dt><dd>{active ? "true" : "false"}</dd>
           <dt>Unique</dt><dd>{unique ? "true" : "false"}</dd>
           <dt>Partitions</dt><dd>{info.partitions}</dd>
-          <dt>Source</dt><dd>{info.source.value}</dd>
+          <dt>Source</dt><dd><Link to={info.source.value}>{info.source.value}</Link></dd>
           {termsMarkup}
           {valuesMarkup}
         </dl>
