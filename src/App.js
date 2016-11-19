@@ -95,11 +95,11 @@ class Container extends Component {
           <h1>FaunaDB Console</h1>
         </div>
         <div className="ms-Grid-row">
-          {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md4 ms-u-lg4">
+          {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4">
             <SecretForm onSubmit={this.updateSecret} />
             <NavTree client={this.state.client} />
           </div>
-          {/* main */} <div className="ms-Grid-col ms-u-sm12 ms-u-md8 ms-u-lg8">
+          {/* main */} <div className="ms-Grid-col ms-u-sm12 ms-u-md7 ms-u-lg8">
             {childrenWithProps}
           </div>
         </div>

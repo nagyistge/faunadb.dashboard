@@ -74,12 +74,21 @@ export class ClassInfo extends Component {
   }
   render() {
     console.log("ClassInfo", this.state)
-    return (<div>
-        <ClassCard client={this.props.client} info={this.state.info}/>
-        <ClassIndexes client={this.props.client} info={this.state.info}/>
-      </div>)
+    const info = this.state.info;
+    return (
+        <div className="ClassInfo">
+          <dl>
+            <dt>Name</dt><dd>{info.name}</dd>
+            <dt>History</dt><dd>{info.history_days} days</dd>
+            <ClassIndexes client={this.props.client} info={this.state.info}/>
+          </dl>
+        </div>
+      );
+
   }
 }
+
+
 
 class ClassIndexes extends Component {
   constructor(props) {
@@ -97,47 +106,23 @@ class ClassIndexes extends Component {
   }
   queryForIndexes(client, classRef) {
     var refName = classRef.value;
-    console.log("queryForIndexes", refName)
     client && client.query(q.Filter(q.Map(q.Paginate(Ref("indexes")), function (indexRef) {
       return q.Get(indexRef)
     }), function (indexInstance) {
       return q.Equals(q.Ref(refName), q.Select("source", indexInstance));
     })).then( (response) => {
-      console.log("queryForIndexes", response)
       this.setState({indexes:response.data})
     })
   }
   render() {
     var info = this.props.info;
-    console.log("ClassIndexes", info, this.state)
     return (
       <div className="ClassIndexes">
-        <ul>
-          {this.state.indexes.map((index)=>(
-            <li key={index.ref.value}><Link to={index.ref.value}>{index.name}</Link></li>
-          ))}
-        </ul>
+        <dt>Covering Indexes</dt>
+        {this.state.indexes.map((index)=>(
+          <dd key={index.ref.value}><Link to={index.ref.value}>{index.name}</Link></dd>
+        ))}
       </div>
     )
-  }
-}
-
-class ClassCard extends Component {
-  render() {
-    var info = this.props.info;
-    console.log("info", info)
-
-
-    return (
-      <div className="ClassInfo">
-        <dl>
-          <dt>Name</dt><dd>{info.name}</dd>
-          <dt>History</dt><dd>{info.history_days} days</dd>
-        </dl>
-
-        <p>Debug info:</p>
-        <pre>{JSON.stringify(info, null, 2)}</pre>
-      </div>
-    );
   }
 }
