@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
 import faunadb from 'faunadb';
 import logo from './logo.svg';
-import './App.css';
 import {Indexes, IndexHome, IndexInfo} from './Indexes'
 import {Classes, ClassesHome, ClassInfo} from './Classes'
+import {NavTree} from './NavTree'
 import {Databases} from './Databases'
 
 const q = faunadb.query, Ref = q.Ref;
@@ -81,21 +81,27 @@ class Container extends Component {
     this.setState({client : clientForSecret});
   }
   render() {
-    console.log("render Container")
+    console.log("Container", this.state)
+
     const childrenWithProps = React.Children.map(this.props.children,
      (child) => React.cloneElement(child, {
        client: this.state.client
      })
     );
+
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <SecretForm onSubmit={this.updateSecret} />
-          <Nav />
+      <div className="ms-Grid">
+        {/* header */} <div className="ms-Grid-row">
+          <h1>FaunaDB Console</h1>
         </div>
-        <div className="App-intro">
-          {childrenWithProps}
+        <div className="ms-Grid-row">
+          {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md4 ms-u-lg4">
+            <SecretForm onSubmit={this.updateSecret} />
+            <NavTree client={this.state.client} />
+          </div>
+          {/* main */} <div className="ms-Grid-col ms-u-sm12 ms-u-md8 ms-u-lg8">
+            {childrenWithProps}
+          </div>
         </div>
       </div>
     )

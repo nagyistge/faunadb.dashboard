@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {Treebeard} from 'react-treebeard';
 import { Link } from 'react-router';
 import faunadb from 'faunadb';
 const q = faunadb.query, Ref = q.Ref;
