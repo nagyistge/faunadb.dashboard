@@ -3,7 +3,7 @@ import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 're
 import faunadb from 'faunadb';
 import logo from './logo.svg';
 import {Indexes, IndexHome, IndexInfo} from './Indexes'
-import {Classes, ClassesHome, ClassInfo} from './Classes'
+import {ClassInfo} from './Classes'
 import {NavTree} from './NavTree'
 import {Databases} from './Databases'
 
@@ -16,14 +16,8 @@ class App extends Component {
         <Route path='/' component={Container}>
           <IndexRoute component={Home} />
           <Route path='/databases' component={Databases} />
-          <Route path='/classes' component={Classes}>
-            <IndexRoute component={ClassesHome} />
-            <Route path='/classes/:name' component={ClassInfo}/>
-          </Route>
-          <Route path='/indexes' component={Indexes}>
-            <IndexRoute component={IndexHome} />
-            <Route path='/indexes/:name' component={IndexInfo}/>
-          </Route>
+          <Route path='/classes/:name' component={ClassInfo}/>
+          <Route path='/indexes/:name' component={IndexInfo}/>
           <Route path='*' component={NotFound} />
         </Route>
       </Router>
@@ -110,8 +104,7 @@ class Container extends Component {
 
 const Home = () =>(
   <div>
-    To get started, edit <code>src/App.js</code> and save to reload.
-      Find <Link to="/databases">databases</Link>
+    To get started, enter a FaunaDB secret in the form.
   </div>
 );
 

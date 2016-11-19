@@ -57,7 +57,7 @@ class NavLevel extends Component {
             // render db name at this level
             return (
               <dd key={db.value}>
-                <Link to={db.value}>{db.value}</Link>
+                <Link to={db.value}>{this._valueTail(db.value)}</Link>
               </dd>
             );
           })}
@@ -65,7 +65,7 @@ class NavLevel extends Component {
           {this.state.classes.map((classRow) => {
             return (
               <dd key={classRow.value}>
-                <Link to={classRow.value}>{classRow.value}</Link>
+                <Link to={classRow.value}>{this._valueTail(classRow.value)}</Link>
               </dd>
             );
           })}
@@ -73,12 +73,17 @@ class NavLevel extends Component {
           {this.state.indexes.map((indexRow) => {
             return (
               <dd key={indexRow.value}>
-                <Link to={indexRow.value}>{indexRow.value}</Link>
+                <Link to={indexRow.value}>{this._valueTail(indexRow.value)}</Link>
               </dd>
             );
           })}
         </dl>
       </div>
     );
+  }
+  _valueTail(string) {
+    var parts = string.split("/")
+    parts.shift()
+    return parts.join("/")
   }
 }

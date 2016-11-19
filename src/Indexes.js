@@ -4,51 +4,6 @@ import { Link } from 'react-router';
 import faunadb from 'faunadb';
 const q = faunadb.query, Ref = q.Ref;
 
-export class Indexes extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {indexes:[]};
-  }
-  componentDidMount() {
-    this.getIndexes(this.props.client)
-  }
-  getIndexes(client) {
-    client && client.query(q.Paginate(Ref("indexes"))).then( (res) => {
-      this.setState({indexes : res.data})
-    })
-  }
-  componentWillReceiveProps(nextProps) {
-    if (this.props.client !==  nextProps.client) {
-      this.getIndexes(nextProps.client)
-    }
-  }
-  render() {
-    const childrenWithProps = React.Children.map(this.props.children,
-     (child) => React.cloneElement(child, {
-       client: this.props.client
-     })
-    );
-    console.log(this.state)
-    return (
-      <div className="Indexes">
-        <p>We found indexes:</p>
-        <ul>
-          {this.state.indexes.map((row) => {
-            return <li key={row.value}><Link to={row.value}>{row.value}</Link></li>;
-          })}
-        </ul>
-        {childrenWithProps}
-      </div>
-    );
-  }
-}
-
-export const IndexHome = () =>(
-  <div>
-    Select an index for more information about it.
-  </div>
-);
-
 export class IndexInfo extends Component {
   constructor(props) {
     super(props);
@@ -72,6 +27,7 @@ export class IndexInfo extends Component {
   }
   render() {
     return (<div>
+        <h3>Index Details</h3>
         <IndexCard client={this.props.client} info={this.state.info}/>
         <IndexQuery client={this.props.client} info={this.state.info}/>
       </div>)
@@ -144,7 +100,7 @@ class QueryResult extends Component {
   }
   render() {
     return (<div>
-        <h2>Query Results</h2>
+        <h3>Query Results</h3>
         <ul>
           {this.state.result.data.map((item)=>{
             console.log(item)
@@ -159,7 +115,7 @@ class QueryResult extends Component {
 class InstancePreview extends Component {
   constructor(props) {
     super(props);
-    this.state = {instance:{}};
+    this.state = {instance:false};
   }
   componentDidMount() {
     this.getInstanceData(this.props.instanceRef);
@@ -176,9 +132,19 @@ class InstancePreview extends Component {
     })
   }
   render() {
+    const instance = this.state.instance;
+    if (!instance){
+      return <div/>;
+    }
     return (<div>
         <h3>Instance Preview</h3>
-        <pre>{JSON.stringify(this.state.instance)}</pre>
+        <dl>
+          <dt>Class</dt><dd>{instance.class.toString()}</dd>
+          <dt>Ref</dt><dd>{instance.ref.toString()}</dd>
+          <dt>TS</dt><dd>{instance.ts}</dd>
+          <dt>Data</dt>
+          <dd><pre>{require('util').inspect(instance.data, { depth: null })}</pre></dd>
+        </dl>
       </div>)
   }
 }
@@ -257,9 +223,6 @@ class IndexCard extends Component {
           {termsMarkup}
           {valuesMarkup}
         </dl>
-
-        <p>Debug info:</p>
-        <pre>{JSON.stringify(info, null, 2)}</pre>
       </div>
     );
   }
