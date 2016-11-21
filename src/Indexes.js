@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Treebeard} from 'react-treebeard';
 import { Link } from 'react-router';
 import faunadb from 'faunadb';
+import {inspect} from 'util';
 const q = faunadb.query, Ref = q.Ref;
 
 export class IndexInfo extends Component {
@@ -172,7 +173,7 @@ class QueryResult extends Component {
         <ul>
           {this.state.result.data.map((item, i)=>{
             console.log(item)
-            return <li key={i} onClick={this.clickedRef.bind(null, item)}>{JSON.stringify(item, null, 2)}</li>
+            return <li key={i} onClick={this.clickedRef.bind(null, item)}>{inspect(item, {depth:null})}</li>
           })}
         </ul>
         <InstancePreview client={this.props.client} instanceRef={this.state.instanceRef}/>
@@ -211,7 +212,7 @@ class InstancePreview extends Component {
           <dt>Ref</dt><dd>{instance.ref.toString()}</dd>
           <dt>TS</dt><dd>{instance.ts}</dd>
           <dt>Data</dt>
-          <dd><pre>{require('util').inspect(instance.data, { depth: null })}</pre></dd>
+          <dd><pre>{inspect(instance.data, { depth: null })}</pre></dd>
         </dl>
       </div>)
   }
@@ -229,13 +230,11 @@ class TermForm extends Component {
   }
   handleSubmit(event) {
     event.preventDefault();
-    var parsed, value = this.state.value;
-    try {
-      parsed = JSON.parse(value);
-      if (parsed["@ref"]) {
-        value = q.Ref(parsed["@ref"])
-      }
-    } catch(e) {} // not JSON
+    var value = this.state.value;
+    var match = value.match(/Ref\(\"(.*)\"\)/);
+    if (match) {
+      value = q.Ref(match[1]);
+    }
     this.props.onSubmit(value);
   }
   render() {
