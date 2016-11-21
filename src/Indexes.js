@@ -86,7 +86,7 @@ class IndexCard extends Component {
 class IndexTermsList extends Component {
   render() {
     var terms = this.props.terms;
-    if (!terms) return null;
+    if (!terms) return null; //<p>Class index for {this.props.info.source.value}</p>
     return (
       <div>
         {terms.map((t, i) => {
@@ -125,7 +125,7 @@ class IndexQuery extends Component {
         }
     } else {
       // run a termless query
-      termInfo = <p>Class index for {this.props.info.source.value}</p>;
+      // termInfo = <p>Class index for {this.props.info.source.value}</p>;
       queryResults = <QueryResult client={this.props.client} info={this.props.info} />
     }
     return (<div>
@@ -165,19 +165,46 @@ class QueryResult extends Component {
   }
   clickedRef(item) {
     console.log("clickedRef",item, this)
-    this.setState({instanceRef:item});
+    if (item.constructor == q.Ref("").constructor) {
+      this.setState({instanceRef:item});
+    }
   }
   render() {
     return (<div>
         <h3>Query Results</h3>
         <ul>
           {this.state.result.data.map((item, i)=>{
-            console.log(item)
-            return <li key={i} onClick={this.clickedRef.bind(null, item)}>{inspect(item, {depth:null})}</li>
+            // console.log(item)
+            return <li key={i} >
+              {
+                Array.isArray(item)
+                ?
+                  item.map((value) => {
+                    return <IndexValue value={value} onClick={this.clickedRef.bind(null, value)}/>
+                  })
+                :
+                  <IndexValue value={item} onClick={this.clickedRef.bind(null, item)}/>
+              }
+            </li>
           })}
         </ul>
         <InstancePreview client={this.props.client} instanceRef={this.state.instanceRef}/>
       </div>)
+  }
+}
+
+class IndexValue extends Component {
+  render() {
+    var body;
+    var value = this.props.value;
+    const someRef = q.Ref("");
+
+    if (value.constructor == someRef.constructor) {
+      body = <a onClick={this.props.onClick}>Ref: {inspect(value, {depth:null})}</a>
+    } else {
+      body = <span>{inspect(value, {depth:null})}</span>
+    }
+    return body;
   }
 }
 
@@ -196,7 +223,7 @@ class InstancePreview extends Component {
   }
   getInstanceData(instanceRef) {
     console.log("getInstanceData", instanceRef)
-    this.props.client && this.props.client.query(q.Get(Ref(instanceRef))).then((res) => {
+    instanceRef && this.props.client && this.props.client.query(q.Get(Ref(instanceRef))).then((res) => {
       this.setState({instance : res})
     })
   }
