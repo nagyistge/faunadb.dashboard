@@ -34,6 +34,74 @@ export class IndexInfo extends Component {
   }
 }
 
+
+class IndexCard extends Component {
+  render() {
+    var info = this.props.info;
+    var active = info.active;
+    var unique = info.unique;
+    return (
+      <div className="IndexInfo">
+
+        <div className="ms-Grid">
+          <div className="ms-Grid-row">
+            <div className="ms-Grid-col ms-u-sm6">
+              Index: {info.name}
+            </div>
+            <div className="ms-Grid-col ms-u-sm6">
+              Source: <Link to={info.source.value}>{info.source.value}</Link>
+            </div>
+          </div>
+
+          <div className="ms-Grid-row">
+            <div className="ms-Grid-col ms-u-sm4">
+              Active: {active ? "true" : "false"}
+            </div>
+            <div className="ms-Grid-col ms-u-sm4">
+              Unique: {unique ? "true" : "false"}
+            </div>
+            <div className="ms-Grid-col ms-u-sm4">
+              Partitions: {info.partitions}
+            </div>
+          </div>
+
+          <div className="ms-Grid-row">
+            <div className="ms-Grid-col ms-u-sm6">
+              <h3>Terms</h3>
+              <IndexTermsList terms={info.terms}/>
+            </div>
+            <div className="ms-Grid-col ms-u-sm6">
+              <h3>Values</h3>
+              <IndexTermsList terms={info.values}/>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    );
+  }
+}
+
+class IndexTermsList extends Component {
+  render() {
+    var terms = this.props.terms;
+    if (!terms) return null;
+    return (
+      <div>
+        {terms.map((t, i) => {
+          return (
+            <dl key={i}>
+              <dt>{JSON.stringify(t.field)}</dt>
+              {t.transform && <dd>Transform: {t.transform}</dd>}
+              {t.reverse && <dd>Reverse: {JSON.stringify(t.reverse)}</dd>}
+            </dl>
+          );
+        })}
+      </div>
+    );
+  }
+}
+
 class IndexQuery extends Component {
   constructor(props) {
     super(props);
@@ -102,9 +170,9 @@ class QueryResult extends Component {
     return (<div>
         <h3>Query Results</h3>
         <ul>
-          {this.state.result.data.map((item)=>{
+          {this.state.result.data.map((item, i)=>{
             console.log(item)
-            return <li key={item.value} onClick={this.clickedRef.bind(null, item)}>{JSON.stringify(item, null, 2)}</li>
+            return <li key={i} onClick={this.clickedRef.bind(null, item)}>{JSON.stringify(item, null, 2)}</li>
           })}
         </ul>
         <InstancePreview client={this.props.client} instanceRef={this.state.instanceRef}/>
@@ -176,54 +244,5 @@ class TermForm extends Component {
         Index term: <input type="text" value={this.state.value} onChange={this.handleChange}/>
       </form>
     )
-  }
-}
-
-class IndexCard extends Component {
-  render() {
-    var info = this.props.info;
-    var active = info.active;
-    var unique = info.unique;
-    console.log("info",info)
-    var termsMarkup = info.terms && <div>
-      <dt>Terms</dt>
-      <dd>
-        <dl>
-          {info.terms.map((t, i)=>{
-            return (<div key={i}>
-              <dt>Field</dt>
-              <dd>{JSON.stringify(t.field)}</dd>
-            </div>)
-          })}
-        </dl>
-      </dd>
-    </div>;
-    var valuesMarkup = info.values && <div>
-      <dt>Values</dt>
-      <dd>
-        <dl>
-          {info.values.map((t, i)=>{
-            return (<div key={i}>
-              <dt>Field</dt>
-              <dd>{JSON.stringify(t.field)}</dd>
-            </div>)
-          })}
-        </dl>
-      </dd>
-    </div>;
-
-    return (
-      <div className="IndexInfo">
-        <dl>
-          <dt>Name</dt><dd>{info.name}</dd>
-          <dt>Active</dt><dd>{active ? "true" : "false"}</dd>
-          <dt>Unique</dt><dd>{unique ? "true" : "false"}</dd>
-          <dt>Partitions</dt><dd>{info.partitions}</dd>
-          <dt>Source</dt><dd><Link to={info.source.value}>{info.source.value}</Link></dd>
-          {termsMarkup}
-          {valuesMarkup}
-        </dl>
-      </div>
-    );
   }
 }
