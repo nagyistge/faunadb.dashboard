@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
+import clientForSubDB from "./clientForSubDB";
 import faunadb from 'faunadb';
 import {Indexes, IndexHome, IndexInfo} from './Indexes'
 import {ClassInfo} from './Classes'
@@ -12,9 +13,9 @@ class App extends Component {
       <Router history={hashHistory}>
         <Route path='/' component={Container}>
           <IndexRoute component={Home} />
-          <Route path='/databases' component={Databases} />
-          <Route path='/classes/:name' component={ClassInfo}/>
-          <Route path='/indexes/:name' component={IndexInfo}/>
+          <Route path='/**/databases' component={Databases} />
+          <Route path='/**/classes/:name' component={ClassInfo}/>
+          <Route path='/**/indexes/:name' component={IndexInfo}/>
           <Route path='*' component={NotFound} />
         </Route>
       </Router>
@@ -27,7 +28,7 @@ class SecretForm extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.state = {value:"kqnPAhRJFfUwAAK04RVasFRTTV3rJxptEiWOhKJSbO4"};
+    this.state = {value:"kqnPAhBy4vLQAAG0H4zu8gMbmRJg9uzk9up-xcAfZS8"};
   }
   handleChange(event) {
     this.setState({value: event.target.value});
@@ -63,10 +64,7 @@ class Container extends Component {
     this.setState({client : clientForSecret});
   }
   onSubDBNav(secret) {
-    var clientForSecret = new faunadb.Client({
-      secret: secret
-    });
-    this.setState({navClient : clientForSecret});
+    console.log('onSubDBNav: ' + secret);
   }
   render() {
     console.log("Container", this.state)

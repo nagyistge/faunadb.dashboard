@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import faunadb from 'faunadb';
+import clientForSubDB from "./clientForSubDB";
 const q = faunadb.query, Ref = q.Ref;
 
 export class ClassInfo extends Component {
@@ -11,18 +12,20 @@ export class ClassInfo extends Component {
     }};
   }
   componentDidMount() {
-    this.getClassInfo(this.props.client, this.props.params.name)
+    this.getClassInfo(this.props.client, this.props.params.splat, this.props.params.name)
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.params.name !== nextProps.params.name ||
       this.props.client !==  nextProps.client) {
-      this.getClassInfo(nextProps.client, nextProps.params.name)
+      this.getClassInfo(nextProps.client, nextProps.params.splat, nextProps.params.name)
     }
   }
-  getClassInfo(client, name) {
-    console.log("getClassInfo", name)
-    client && client.query(q.Get(Ref("classes/"+name))).then( (res) => {
-      this.setState({info : res})
+  getClassInfo(client, path, name) {
+    console.log("getClassInfo", client, path, name)
+    if (!client) return;
+    var scopedClient = clientForSubDB(client, path, "server");
+    scopedClient.query(q.Get(Ref("classes/"+name))).then( (res) => {
+      this.setState({info : res, scopedClient})
     })
   }
   render() {
@@ -34,7 +37,7 @@ export class ClassInfo extends Component {
           <dl>
             <dt>Name</dt><dd>{info.name}</dd>
             <dt>History</dt><dd>{info.history_days} days</dd>
-            <ClassIndexes client={this.props.client} info={this.state.info}/>
+            <ClassIndexes client={this.state.scopedClient} info={this.state.info}/>
           </dl>
         </div>
       );
@@ -57,6 +60,7 @@ class ClassIndexes extends Component {
   }
   queryForIndexes(client, classRef) {
     var refName = classRef.value;
+    console.log("queryForIndexes", client, classRef)
     client && client.query(q.Filter(q.Map(q.Paginate(Ref("indexes")), function (indexRef) {
       return q.Get(indexRef)
     }), function (indexInstance) {
