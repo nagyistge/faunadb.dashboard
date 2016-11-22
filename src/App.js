@@ -16,6 +16,9 @@ class App extends Component {
           <Route path='/**/databases' component={Databases} />
           <Route path='/**/classes/:name' component={ClassInfo}/>
           <Route path='/**/indexes/:name' component={IndexInfo}/>
+          <Route path='/databases' component={Databases} />
+          <Route path='/classes/:name' component={ClassInfo}/>
+          <Route path='/indexes/:name' component={IndexInfo}/>
           <Route path='*' component={NotFound} />
         </Route>
       </Router>

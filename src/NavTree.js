@@ -16,26 +16,28 @@ export class NavTree extends Component {
     })
   }
   discoverKeyType(client) {
-    // console.log("discoverKeyType", client)
+    console.log("discoverKeyType", client)
     if (!client) return;
     client.query(q.Create(Ref("databases"), { name: "console_key_type_discovery_db_created_and_deleted_automatically_always_safe_to_delete" }))
       .then(()=>{
         // we are an admin key, lets fix our mess
+        console.log("admin key", client)
         return client.query(q.Delete(Ref("databases/console_key_type_discovery_db_created_and_deleted_automatically_always_safe_to_delete"))).then(()=>{
           this.setState({adminClient : client});
         })
       }, (error) => {
-        // console.log("admin error", error)
+        console.log("admin error", error)
         if (error.name === "PermissionDenied") {
           return client.query(q.Create(Ref("classes"), {
             name: "console_key_type_discovery_class_created_and_deleted_automatically_always_safe_to_delete"
           })).then(()=>{
             // we are a server key, lets fix our mess
+            console.log("server key", client)
             return client.query(q.Delete(Ref("classes/console_key_type_discovery_class_created_and_deleted_automatically_always_safe_to_delete"))).then(()=>{
               this.setState({serverClient : client});
             })
           }, (error) => {
-            // console.log("server error", error)
+            console.log("server error", error)
             return client.query(q.Delete(Ref("classes/console_key_type_discovery_class_created_and_deleted_automatically_always_safe_to_delete")))
 
           })
@@ -58,7 +60,7 @@ export class NavTree extends Component {
     console.log("NavTree", this.state)
     return (
       <div className="NavTree">
-        <NavLevel serverClient={this.state.serverClient} adminClient={this.state.adminClient} expanded/>
+        <NavLevel name="/" serverClient={this.state.serverClient} adminClient={this.state.adminClient} expanded/>
       </div>
     );
   }
@@ -73,17 +75,19 @@ class NavLevel extends Component {
     this.getInfos(this.props)
   }
   componentWillReceiveProps(nextProps) {
+    // console.log("NavLevel admin componentWillReceiveProps", (this.props.adminClient ||{})._secret, nextProps.adminClient._secret)
+    // console.log("NavLevel server componentWillReceiveProps", (this.props.serverClient ||{})._secret, nextProps.serverClient._secret)
     this.getInfos(nextProps)
   }
   getInfos(props) {
-    // console.log("getInfos", props)
+    console.log("getInfos", props)
     if (!props.expanded) return;
     this.getDatabases(props.adminClient);
     this.getClasses(props.serverClient);
     this.getIndexes(props.serverClient);
   }
   getDatabases(client) {
-    // console.log("getDatabases", client)
+    console.log("getDatabases", client)
     client && client.query(q.Paginate(Ref("databases"))).then( (res) => {
       this.setState({databases : res.data})
     }).catch(console.error.bind(console, "getDatabases"))
@@ -116,26 +120,13 @@ class NavLevel extends Component {
     // console.log("NavLevel",this.state)
     return (
       <div className="NavLevel">
+        <strong>{this.props.name}</strong>
         <dl>
-          <dt key="_databases" >Databases</dt>
-          {this.state.databases.map((db) => {
-            // render db name at this level
-            const db_name = this._valueTail(db.value);
-            return (
-              <dd key={db.value}>
-                <Link to={db.value}>{db_name}</Link>
-                <NavLevel
-                  adminClient={clientForSubDB(this.props.adminClient, db_name, "admin")}
-                  serverClient={clientForSubDB(this.props.adminClient, db_name, "server")}
-                  expanded/>
-              </dd>
-            );
-          })}
           <dt key="_classes" >Classes</dt>
           {this.state.classes.map((classRow) => {
             return (
               <dd key={classRow.value}>
-                <Link to={classRow.value}>{this._valueTail(classRow.value)}</Link>
+                <Link to={this.props.name+classRow.value}>{this._valueTail(classRow.value)}</Link>
               </dd>
             );
           })}
@@ -143,7 +134,22 @@ class NavLevel extends Component {
           {this.state.indexes.map((indexRow) => {
             return (
               <dd key={indexRow.value}>
-                <Link to={indexRow.value}>{this._valueTail(indexRow.value)}</Link>
+                <Link to={this.props.name+indexRow.value}>{this._valueTail(indexRow.value)}</Link>
+              </dd>
+            );
+          })}
+          <dt key="_databases" >Databases</dt>
+          {this.state.databases.map((db) => {
+            // render db name at this level
+            const db_name = this._valueTail(db.value);
+            return (
+              <dd key={db.value}>
+                <Link to={this.props.name+db.value}>{db_name}</Link>
+                <NavLevel
+                  name={this.props.name+db_name+"/"}
+                  adminClient={clientForSubDB(this.props.adminClient, db_name, "admin")}
+                  serverClient={clientForSubDB(this.props.adminClient, db_name, "server")}
+                  expanded/>
               </dd>
             );
           })}
