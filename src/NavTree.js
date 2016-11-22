@@ -98,6 +98,22 @@ class NavLevel extends Component {
       this.setState({indexes : res.data})
     }).catch(console.error.bind(console, "getIndexes"))
   }
+  clientForSubDB(adminClient, db_name, type) {
+    var path, encoded = adminClient._secret,
+      parts = encoded.split(":"),
+      secret = parts.shift();
+    if (parts.length == 2) {
+      path = parts[0] + "/" + db_name
+    } else {
+      path = db_name
+    }
+    return new faunadb.Client({
+      secret : secret + ":" + path + ":" + type
+    })
+  }
+  serverClientForSubDB(adminClient, db_name) {
+
+  }
   render() {
     console.log("NavLevel",this.state)
     return (
@@ -105,20 +121,15 @@ class NavLevel extends Component {
         <dl>
           <dt key="_databases" >Databases</dt>
           {this.state.databases.map((db) => {
-            var adminClientForSubDB, serverClientForSubDB;
-            if (this.props.adminClient) {
-              adminClientForSubDB = new faunadb.Client({
-                secret : this.props.adminClient._secret + ":" + this._valueTail(db.value) + ":admin"
-              })
-              serverClientForSubDB = new faunadb.Client({
-                secret : this.props.adminClient._secret + ":" + this._valueTail(db.value) + ":server"
-              })
-            }
             // render db name at this level
+            const db_name = this._valueTail(db.value);
             return (
               <dd key={db.value}>
-                <Link to={db.value}>{this._valueTail(db.value)}</Link>
-                <NavLevel adminClient={adminClientForSubDB} serverClient={serverClientForSubDB} expanded/>
+                <Link to={db.value}>{db_name}</Link>
+                <NavLevel
+                  adminClient={this.clientForSubDB(this.props.adminClient, db_name, "admin")}
+                  serverClient={this.clientForSubDB(this.props.adminClient, db_name, "server")} 
+                  expanded/>
               </dd>
             );
           })}
