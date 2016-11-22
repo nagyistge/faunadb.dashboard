@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
 import faunadb from 'faunadb';
-import logo from './logo.svg';
 import {Indexes, IndexHome, IndexInfo} from './Indexes'
 import {ClassInfo} from './Classes'
 import {NavTree} from './NavTree'
 import {Databases} from './Databases'
-
-const q = faunadb.query, Ref = q.Ref;
 
 class App extends Component {
   render() {
@@ -24,16 +21,6 @@ class App extends Component {
     );
   }
 }
-
-const Nav = () => (
-  <div>
-    <Link to='/'>Home</Link>&nbsp;
-    <Link to="/databases">Databases</Link>&nbsp;
-    <Link to="/classes">Classes</Link>&nbsp;
-    <Link to="/indexes">Indexes</Link>&nbsp;
-    <Link to="/instances">Instances</Link>
-  </div>
-)
 
 class SecretForm extends Component {
   constructor(props) {
@@ -65,6 +52,7 @@ class Container extends Component {
     super(props);
     this.state = {client:false};
     this.updateSecret = this.updateSecret.bind(this);
+    this.onSubDBNav = this.onSubDBNav.bind(this);
   }
   updateSecret(secret) {
     console.log('Secret is: ' + secret);
@@ -73,6 +61,12 @@ class Container extends Component {
       secret: secret
     });
     this.setState({client : clientForSecret});
+  }
+  onSubDBNav(secret) {
+    var clientForSecret = new faunadb.Client({
+      secret: secret
+    });
+    this.setState({navClient : clientForSecret});
   }
   render() {
     console.log("Container", this.state)
@@ -91,7 +85,7 @@ class Container extends Component {
         <div className="ms-Grid-row">
           {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4">
             <SecretForm onSubmit={this.updateSecret} />
-            <NavTree client={this.state.client} />
+            <NavTree client={this.state.client} onSubDBNav={this.onSubDBNav} />
           </div>
           {/* main */} <div className="ms-Grid-col ms-u-sm12 ms-u-md7 ms-u-lg8">
             {childrenWithProps}
