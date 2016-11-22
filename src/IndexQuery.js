@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 // import { Link } from 'react-router';
-import faunadb from 'faunadb';
-const q = faunadb.query, Ref = q.Ref;
+import {DetailsList, DetailsRow} from 'office-ui-fabric-react'
+
+import {query as q} from 'faunadb';
+const Ref = q.Ref;
 import {inspect} from 'util';
+
 
 export default class IndexQuery extends Component {
   constructor(props) {
@@ -19,14 +22,13 @@ export default class IndexQuery extends Component {
     if (this.props.info.terms) {
       // get a term
       termInfo = <TermForm onSubmit={this.gotTerm}/>;
-        if (this.state.term) {
-          queryResults = <QueryResult client={this.props.client} info={this.props.info} term={this.state.term}/>
-        } else {
-          // no query
-        }
+      if (this.state.term) {
+        queryResults = <QueryResult client={this.props.client} info={this.props.info} term={this.state.term}/>
+      } else {
+        // no query
+      }
     } else {
       // run a termless query
-      // termInfo = <p>Class index for {this.props.info.source.value}</p>;
       queryResults = <QueryResult client={this.props.client} info={this.props.info} />
     }
     return (<div>
@@ -38,9 +40,10 @@ export default class IndexQuery extends Component {
 class QueryResult extends Component {
   constructor(props) {
     super(props);
-    this.state = {result:{data:[]}};
+    this.state = {data:[]};
     this.clickedRef = this.clickedRef.bind(this);
-
+    this._onRenderRow = this._onRenderRow.bind(this);
+    this._renderItemColumn = this._renderItemColumn.bind(this);
   }
   componentDidMount() {
     this.getIndexRows(this.props.info.name, this.props.term);
@@ -52,7 +55,6 @@ class QueryResult extends Component {
     }
   }
   getIndexRows(name, term) {
-    console.log("get rows for", name, term)
     if (!name) return;
     var query;
     if (term) {
@@ -61,53 +63,63 @@ class QueryResult extends Component {
       query = q.Paginate(q.Match(Ref("indexes/"+name)))
     }
     this.props.client && this.props.client.query(query).then((res) => {
-      this.setState({result : res})
-    })
+      this.setState({data : this.makeResultIntoTableData(res)})
+    }).catch(console.error.bind(console, name))
   }
-  clickedRef(item) {
+  makeResultIntoTableData(result) {
+    const values = this.props.info.values;
+    // return the result structured as rows with column names
+    // alternatively we could provide a column map to the table view
+    if (values) {
+      const keynames = values.map((v) => v.field.join("."));
+      if (!result.data) return [];
+      return result.data.map((resItem) => {
+        var item = {};
+        for (var i = 0; i < keynames.length; i++) {
+          item[keynames[i]] = resItem[i];
+        }
+        return item;
+      });
+    } else {
+      return result.data.map((resItem) => {
+        return {value:resItem}
+      })
+    }
+  }
+  clickedRef(item, event) {
+    event.preventDefault()
     console.log("clickedRef",item, this)
     if (item.constructor === q.Ref("").constructor) {
       this.setState({instanceRef:item});
     }
   }
+  _onRenderRow (props) {
+    return <DetailsRow { ...props } onRenderCheck={ this._onRenderCheck } />;
+  }
+  _onRenderCheck(props) {
+    return null;
+  }
+  _renderItemColumn(item, index, column) {
+    let fieldContent = item[column.fieldName];
+    if (fieldContent.constructor === q.Ref("").constructor) {
+      return <a href="#" onClick={this.clickedRef.bind(null, fieldContent)}>{inspect(fieldContent, {depth:null})}</a>
+    } else {
+      return <span>{ fieldContent }</span>;
+    }
+  }
   render() {
     return (<div>
         <h3>Query Results</h3>
-        <ul>
-          {this.state.result.data.map((item, i)=>{
-            // console.log(item)
-            return <li key={i} >
-              {
-                Array.isArray(item)
-                ?
-                  item.map((value) => {
-                    return <IndexValue value={value} onClick={this.clickedRef.bind(null, value)}/>
-                  })
-                :
-                  <IndexValue value={item} onClick={this.clickedRef.bind(null, item)}/>
-              }
-            </li>
-          })}
-        </ul>
-        <InstancePreview client={this.props.client} instanceRef={this.state.instanceRef}/>
+          <DetailsList
+            onRenderItemColumn={this._renderItemColumn}
+            onRenderRow={ this._onRenderRow }
+            selectionMode="none"
+         items={ this.state.data }/>
+         <InstancePreview client={this.props.client} instanceRef={this.state.instanceRef}/>
       </div>)
   }
 }
 
-class IndexValue extends Component {
-  render() {
-    var body;
-    var value = this.props.value;
-    const someRef = q.Ref("");
-
-    if (value.constructor === someRef.constructor) {
-      body = <a onClick={this.props.onClick}>Ref: {inspect(value, {depth:null})}</a>
-    } else {
-      body = <span>{inspect(value, {depth:null})}</span>
-    }
-    return body;
-  }
-}
 
 class InstancePreview extends Component {
   constructor(props) {
@@ -123,7 +135,6 @@ class InstancePreview extends Component {
     }
   }
   getInstanceData(instanceRef) {
-    console.log("getInstanceData", instanceRef)
     instanceRef && this.props.client && this.props.client.query(q.Get(Ref(instanceRef))).then((res) => {
       this.setState({instance : res})
     })
@@ -131,7 +142,7 @@ class InstancePreview extends Component {
   render() {
     const instance = this.state.instance;
     if (!instance){
-      return <div/>;
+      return null;
     }
     return (<div>
         <h3>Instance Preview</h3>
@@ -151,7 +162,7 @@ class TermForm extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.state = {value:""};
+    this.state = {value:props.value||""};
   }
   handleChange(event) {
     this.setState({value: event.target.value});
@@ -165,10 +176,15 @@ class TermForm extends Component {
     }
     this.props.onSubmit(value);
   }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.value !== nextProps.value) {
+      this.setState({value: nextProps.value});
+    }
+  }
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
-        Index term: <input type="text" value={this.state.value} onChange={this.handleChange}/>
+        Lookup term: <input type="text" value={this.state.value} onChange={this.handleChange}/>
       </form>
     )
   }
