@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
 import clientForSubDB from "./clientForSubDB";
 import faunadb from 'faunadb';
-import {Indexes, IndexHome, IndexInfo} from './Indexes'
+import {IndexInfo, IndexForm} from './Indexes'
 import {ClassInfo, ClassForm} from './Classes'
 import {NavTree} from './NavTree'
 import {Databases} from './Databases'
@@ -15,14 +15,19 @@ class App extends Component {
       <Router history={hashHistory}>
         <Route path='/' component={Container}>
           <IndexRoute component={Home} />
-          <Route path='/**/databases' component={Databases} />
-          <Route path='/**/classes' component={ClassForm}/>
-          <Route path='/**/classes/:name' component={ClassInfo}/>
-          <Route path='/**/indexes/:name' component={IndexInfo}/>
           <Route path='/databases' component={Databases} />
+          <Route path='/**/databases' component={Databases} />
+
           <Route path='/classes' component={ClassForm}/>
           <Route path='/classes/:name' component={ClassInfo}/>
+          <Route path='/**/classes' component={ClassForm}/>
+          <Route path='/**/classes/:name' component={ClassInfo}/>
+
+          <Route path='/indexes' component={IndexForm}/>
           <Route path='/indexes/:name' component={IndexInfo}/>
+          <Route path='/**/indexes' component={IndexForm}/>
+          <Route path='/**/indexes/:name' component={IndexInfo}/>
+
           <Route path='*' component={NotFound} />
         </Route>
       </Router>

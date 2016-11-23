@@ -81,14 +81,13 @@ class NavLevel extends Component {
     this.getInfos(nextProps)
   }
   getInfos(props) {
-    console.log("getInfos", props)
     if (!props.expanded) return;
     this.getDatabases(props.adminClient);
     this.getClasses(props.serverClient);
     this.getIndexes(props.serverClient);
   }
   getDatabases(client) {
-    console.log("getDatabases", client)
+    // console.log("getDatabases", client)
     client && client.query(q.Paginate(Ref("databases"))).then( (res) => {
       this.setState({databases : res.data})
     }).catch(console.error.bind(console, "getDatabases"))
@@ -108,11 +107,10 @@ class NavLevel extends Component {
     event.preventDefault();
     var expanded = this.state.expanded
     expanded[value] = !expanded[value]
-    console.log("expanded", expanded)
     this.setState({expanded : expanded})
   }
   render() {
-    console.log("NavLevel",this.state.expanded)
+    // console.log("NavLevel",this.state.expanded)
     if (!this.props.expanded) {
       return (<div className="NavLevel"></div>)
     }
@@ -127,7 +125,7 @@ class NavLevel extends Component {
               </dd>
             );
           })}
-          <dt key="_indexes" >Indexes</dt>
+          <dt key="_indexes" >Indexes [<Link to={this.props.name+"indexes"}>+</Link>]</dt>
           {this.state.indexes.map((indexRow) => {
             return (
               <dd key={indexRow.value}>
