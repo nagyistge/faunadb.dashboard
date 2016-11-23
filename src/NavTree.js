@@ -69,7 +69,8 @@ export class NavTree extends Component {
 class NavLevel extends Component {
   constructor(props) {
     super(props);
-    this.state = {databases:[], classes:[], indexes:[]};
+    this.toggleDB.bind(this);
+    this.state = {expanded:{}, databases:[], classes:[], indexes:[]};
   }
   componentDidMount() {
     this.getInfos(this.props)
@@ -103,21 +104,18 @@ class NavLevel extends Component {
       this.setState({indexes : res.data})
     }).catch(console.error.bind(console, "getIndexes"))
   }
-  // clientForSubDB(adminClient, db_name, type) {
-  //   var path, encoded = adminClient._secret,
-  //     parts = encoded.split(":"),
-  //     secret = parts.shift();
-  //   if (parts.length == 2) {
-  //     path = parts[0] + "/" + db_name
-  //   } else {
-  //     path = db_name
-  //   }
-  //   return new faunadb.Client({
-  //     secret : secret + ":" + path + ":" + type
-  //   })
-  // }
+  toggleDB(value, event) {
+    event.preventDefault();
+    var expanded = this.state.expanded
+    expanded[value] = !expanded[value]
+    console.log("expanded", expanded)
+    this.setState({expanded : expanded})
+  }
   render() {
-    // console.log("NavLevel",this.state)
+    console.log("NavLevel",this.state.expanded)
+    if (!this.props.expanded) {
+      return (<div className="NavLevel"></div>)
+    }
     return (
       <div className="NavLevel">
         <dl>
@@ -143,12 +141,12 @@ class NavLevel extends Component {
             const db_name = this._valueTail(db.value);
             return (
               <dd key={db.value}>
-                <Link to={this.props.name+db.value}>{db_name}</Link>
+                <a href="#" onClick={this.toggleDB.bind(this, db.value)}>{db_name}</a>
                 <NavLevel
                   name={this.props.name+db_name+"/"}
                   adminClient={clientForSubDB(this.props.adminClient, db_name, "admin")}
                   serverClient={clientForSubDB(this.props.adminClient, db_name, "server")}
-                  expanded/>
+                  expanded={!!this.state.expanded[db.value]}/>
               </dd>
             );
           })}
