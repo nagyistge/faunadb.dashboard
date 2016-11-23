@@ -120,7 +120,6 @@ class NavLevel extends Component {
     // console.log("NavLevel",this.state)
     return (
       <div className="NavLevel">
-        <strong>{this.props.name}</strong>
         <dl>
           <dt key="_classes" >Classes</dt>
           {this.state.classes.map((classRow) => {

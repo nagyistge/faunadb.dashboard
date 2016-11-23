@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import faunadb from 'faunadb';
+import clientForSubDB from "./clientForSubDB";
 import {inspect} from 'util';
 import IndexQuery from './IndexQuery'
 const q = faunadb.query, Ref = q.Ref;
@@ -13,24 +14,33 @@ export class IndexInfo extends Component {
     }};
   }
   componentDidMount() {
-    this.getIndexInfo(this.props.client, this.props.params.name)
+    this.getIndexInfo(this.props.client, this.props.params.splat, this.props.params.name)
   }
-  getIndexInfo(client, name) {
-    client && client.query(q.Get(Ref("indexes/"+name))).then( (res) => {
-      this.setState({info : res})
+  getIndexInfo(client, path, name) {
+    if (!client) return;
+    var scopedClient;
+    if (path) {
+      scopedClient = clientForSubDB(client, path, "server");
+    } else {
+      // we are in a server key context
+      // so we don't know our path and can't change our client
+      scopedClient = client;
+    }
+    scopedClient.query(q.Get(Ref("indexes/"+name))).then( (res) => {
+      this.setState({info : res, scopedClient})
     })
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.params.name !== nextProps.params.name ||
       this.props.client !== nextProps.client) {
-      this.getIndexInfo(nextProps.client, nextProps.params.name)
+      this.getIndexInfo(nextProps.client, nextProps.params.splat, nextProps.params.name)
     }
   }
   render() {
     return (<div>
         <h3>Index Details</h3>
-        <IndexCard client={this.props.client} info={this.state.info}/>
-        <IndexQuery client={this.props.client} info={this.state.info}/>
+        <IndexCard path={this.props.params.splat} client={this.state.scopedClient} info={this.state.info}/>
+        <IndexQuery client={this.state.scopedClient} info={this.state.info}/>
       </div>)
   }
 }
@@ -50,7 +60,7 @@ class IndexCard extends Component {
               Index: {info.name}
             </div>
             <div className="ms-Grid-col ms-u-sm6">
-              Source: <Link to={info.source.value}>{info.source.value}</Link>
+              Source: <Link to={this.props.path ? this.props.path+"/"+info.source.value : info.source.value}>{info.source.value}</Link>
             </div>
           </div>
 

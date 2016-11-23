@@ -82,7 +82,7 @@ class ClassIndexes extends Component {
       <div className="ClassIndexes">
         <dt>Covering Indexes</dt>
         {this.state.indexes.map((index)=>(
-          <dd key={index.ref.value}><Link to={this.props.path+"/"+index.ref.value}>{index.name}</Link></dd>
+          <dd key={index.ref.value}><Link to={this.props.path ? this.props.path+"/"+index.ref.value : index.ref.value}>{index.name}</Link></dd>
         ))}
       </div>
     )
