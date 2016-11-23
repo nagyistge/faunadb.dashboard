@@ -46,15 +46,17 @@ class QueryResult extends Component {
     this._renderItemColumn = this._renderItemColumn.bind(this);
   }
   componentDidMount() {
-    this.getIndexRows(this.props.info.name, this.props.term);
+    this.getIndexRows(this.props.client, this.props.info.name, this.props.term);
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.info.name !== nextProps.info.name ||
-      this.props.term !== nextProps.term) {
-      this.getIndexRows(nextProps.info.name, nextProps.term)
+      this.props.term !== nextProps.term ||
+      this.props.client !== nextProps.client) {
+      this.getIndexRows(nextProps.client, nextProps.info.name, nextProps.term)
     }
   }
-  getIndexRows(name, term) {
+  getIndexRows(client, name, term) {
+    // console.log("getIndexRows", client, name, term)
     if (!name) return;
     var query;
     if (term) {
@@ -62,7 +64,8 @@ class QueryResult extends Component {
     } else {
       query = q.Paginate(q.Match(Ref("indexes/"+name)))
     }
-    this.props.client && this.props.client.query(query).then((res) => {
+    client && client.query(query).then((res) => {
+      // console.log("res", res)
       this.setState({data : this.makeResultIntoTableData(res)})
     }).catch(console.error.bind(console, name))
   }
@@ -75,8 +78,12 @@ class QueryResult extends Component {
       if (!result.data) return [];
       return result.data.map((resItem) => {
         var item = {};
-        for (var i = 0; i < keynames.length; i++) {
-          item[keynames[i]] = resItem[i];
+        if (keynames.length === 1) { // special case for single column
+          item[keynames[0]] = resItem;
+        } else {
+          for (var i = 0; i < keynames.length; i++) {
+            item[keynames[i]] = resItem[i];
+          }
         }
         return item;
       });

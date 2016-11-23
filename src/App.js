@@ -6,6 +6,8 @@ import {Indexes, IndexHome, IndexInfo} from './Indexes'
 import {ClassInfo} from './Classes'
 import {NavTree} from './NavTree'
 import {Databases} from './Databases'
+import logo from './logo.svg';
+import './App.css';
 
 class App extends Component {
   render() {
@@ -80,11 +82,11 @@ class Container extends Component {
 
     return (
       <div className="ms-Grid">
-        {/* header */} <div className="ms-Grid-row">
-          <h1>FaunaDB Console</h1>
+        {/* header */} <div className="ms-Grid-row header">
+        <img src={logo} className="logo" alt="logo" />
         </div>
         <div className="ms-Grid-row">
-          {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4">
+          {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4 sidebar">
             <SecretForm onSubmit={this.updateSecret} />
             <NavTree client={this.state.client} onSubDBNav={this.onSubDBNav} />
           </div>
