@@ -133,7 +133,7 @@ class NavLevel extends Component {
               </dd>
             );
           })}
-          <dt key="_databases" >Databases</dt>
+          <dt key="_databases" >Databases [<Link to={this.props.name+"databases"}>+</Link>]</dt>
           {this.state.databases.map((db) => {
             // render db name at this level
             const db_name = this._valueTail(db.value);
