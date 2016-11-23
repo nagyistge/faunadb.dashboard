@@ -119,7 +119,7 @@ class NavLevel extends Component {
     return (
       <div className="NavLevel">
         <dl>
-          <dt key="_classes" >Classes</dt>
+          <dt key="_classes" >Classes [<Link to={this.props.name+"classes"}>+</Link>]</dt>
           {this.state.classes.map((classRow) => {
             return (
               <dd key={classRow.value}>

@@ -3,7 +3,7 @@ import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 're
 import clientForSubDB from "./clientForSubDB";
 import faunadb from 'faunadb';
 import {Indexes, IndexHome, IndexInfo} from './Indexes'
-import {ClassInfo} from './Classes'
+import {ClassInfo, ClassForm} from './Classes'
 import {NavTree} from './NavTree'
 import {Databases} from './Databases'
 import logo from './logo.svg';
@@ -16,9 +16,11 @@ class App extends Component {
         <Route path='/' component={Container}>
           <IndexRoute component={Home} />
           <Route path='/**/databases' component={Databases} />
+          <Route path='/**/classes' component={ClassForm}/>
           <Route path='/**/classes/:name' component={ClassInfo}/>
           <Route path='/**/indexes/:name' component={IndexInfo}/>
           <Route path='/databases' component={Databases} />
+          <Route path='/classes' component={ClassForm}/>
           <Route path='/classes/:name' component={ClassInfo}/>
           <Route path='/indexes/:name' component={IndexInfo}/>
           <Route path='*' component={NotFound} />
