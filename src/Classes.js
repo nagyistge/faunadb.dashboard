@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
-import {TextField, NumberTextField, Button, ButtonType} from 'office-ui-fabric-react'
+import {TextField, Button, ButtonType} from 'office-ui-fabric-react'
 import faunadb from 'faunadb';
 import clientForSubDB from "./clientForSubDB";
 const q = faunadb.query, Ref = q.Ref;
@@ -47,6 +47,7 @@ export class ClassInfo extends Component {
             <dt>History</dt><dd>{info.history_days} days</dd>
             <ClassIndexes path={this.props.params.splat} client={this.state.scopedClient} info={this.state.info}/>
           </dl>
+          <InstanceForm path={this.props.params.splat} client={this.state.scopedClient} info={this.state.info}/>
         </div>
       );
   }
@@ -87,6 +88,48 @@ class ClassIndexes extends Component {
         ))}
       </div>
     )
+  }
+}
+
+class InstanceForm extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {form:{data:"{}"}}
+    this.onChange = this.onChange.bind(this)
+    this.onSubmit = this.onSubmit.bind(this)
+  }
+  onChange(field, value) {
+    console.log("onChange", field, value)
+    var form = this.state.form;
+    form[field] = value;
+    this.setState({form})
+  }
+  onSubmit(event) {
+    event.preventDefault();
+    console.log("onSubmit", this.props, this.state.form.data)
+    var data = JSON.parse(this.state.form.data);
+    var createQuery = q.Create(this.props.info.ref, {
+      data: data
+    });
+    console.log(data, createQuery)
+    this.props.client && this.props.client.query(createQuery)
+  }
+  render() {
+    var context = this.props.path ? " in "+this.props.path : "";
+    console.log("InstanceForm", this.state, this.props)
+    return (
+      <div className="InstanceForm">
+        <form>
+          <h4>Create an instance of {this.props.info.name}{context}</h4>
+            <TextField label="Data"
+              multiline
+              description="The contents of this field will be evaluated with the Ref() constructor in scope."
+              value={this.state.form.data}
+              onChanged={this.onChange.bind(this, "data")}/>
+            <Button buttonType={ ButtonType.primary } onClick={this.onSubmit}>Create Instance</Button>
+        </form>
+      </div>
+    );
   }
 }
 
