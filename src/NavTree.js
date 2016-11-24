@@ -58,11 +58,15 @@ export class NavTree extends Component {
   }
   render() {
     console.log("NavTree", this.state)
-    return (
-      <div className="NavTree">
-        <NavLevel name="/" serverClient={this.state.serverClient} adminClient={this.state.adminClient} expanded/>
-      </div>
-    );
+    if (this.state.serverClient || this.state.adminClient) {
+      return (
+        <div className="NavTree">
+          <h3>Data Navigator</h3>
+          <NavLevel name="/" serverClient={this.state.serverClient} adminClient={this.state.adminClient} expanded/>
+        </div>
+      );
+    }
+    return null;
   }
 }
 

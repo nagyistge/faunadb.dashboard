@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
+import {TextField, Button, ButtonType} from 'office-ui-fabric-react'
 import clientForSubDB from "./clientForSubDB";
 import faunadb from 'faunadb';
 import {IndexInfo, IndexForm} from './Indexes'
@@ -42,20 +43,20 @@ class SecretForm extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {value:"kqnPAhBy4vLQAAG0H4zu8gMbmRJg9uzk9up-xcAfZS8"};
   }
-  handleChange(event) {
-    this.setState({value: event.target.value});
+  handleChange(value) {
+    this.setState({value: value});
   }
-  handleSubmit(event) {
-    // console.log('Secret is: ' + this.state.value);
-    event.preventDefault();
+  handleSubmit() {
     this.props.onSubmit(this.state.value)
   }
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <input type="password" value={this.state.value} onChange={this.handleChange}/>
-        <input type="submit"/>
-      </form>
+      <div className="SecretForm">
+        <TextField type="password" label="Key Secret"
+          description="Visit https://fauna.com/account/keys or talk to your administrator to provision keys."
+          value={this.state.value} onChanged={this.handleChange}/>
+        <Button buttonType={ ButtonType.primary } onClick={this.handleSubmit}>Set Secret</Button>
+      </div>
     )
   }
 }
@@ -65,7 +66,6 @@ class Container extends Component {
     super(props);
     this.state = {client:false};
     this.updateSecret = this.updateSecret.bind(this);
-    this.onSubDBNav = this.onSubDBNav.bind(this);
   }
   updateSecret(secret) {
     console.log('Secret is: ' + secret);
@@ -75,9 +75,6 @@ class Container extends Component {
     });
     this.setState({client : clientForSecret});
   }
-  onSubDBNav(secret) {
-    console.log('onSubDBNav: ' + secret);
-  }
   render() {
     console.log("Container", this.state)
 
@@ -86,16 +83,15 @@ class Container extends Component {
        client: this.state.client
      })
     );
-
     return (
-      <div className="ms-Grid">
+      <div className="ms-Grid ms-Fabric ms-font-m">
         {/* header */} <div className="ms-Grid-row header">
         <img src={logo} className="logo" alt="logo" />
         </div>
         <div className="ms-Grid-row">
           {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4 sidebar">
+            <NavTree client={this.state.client} />
             <SecretForm onSubmit={this.updateSecret} />
-            <NavTree client={this.state.client} onSubDBNav={this.onSubDBNav} />
           </div>
           {/* main */} <div className="ms-Grid-col ms-u-sm12 ms-u-md7 ms-u-lg8">
             {childrenWithProps}
