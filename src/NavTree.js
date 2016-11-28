@@ -142,7 +142,8 @@ class NavLevel extends Component {
             const db_name = this._valueTail(db.value);
             return (
               <dd key={db.value}>
-                <a href="#" onClick={this.toggleDB.bind(this, db.value)}>{db_name}</a>
+                <a href="#" onClick={this.toggleDB.bind(this, db.value)}>{!!this.state.expanded[db.value] ? "V" : ">"}</a>
+                &nbsp;<Link to={this.props.name+db_name+"/info"}>{db_name}</Link>
                 <NavLevel
                   name={this.props.name+db_name+"/"}
                   adminClient={clientForSubDB(this.props.adminClient, db_name, "admin")}

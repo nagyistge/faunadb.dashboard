@@ -5,13 +5,11 @@ import faunadb from 'faunadb';
 import {IndexInfo, IndexForm} from './Indexes'
 import {ClassInfo, ClassForm} from './Classes'
 import {NavTree} from './NavTree'
-import {Databases} from './Databases'
+import {Databases, DatabaseInfo} from './Databases'
 import logo from './logo.svg';
 import './App.css';
 
 const ERROR_MESSAGE_DISPLAY_MS = 5000;
-
-
 
 class SecretForm extends Component {
   constructor(props) {
@@ -131,6 +129,7 @@ class App extends Component {
           <IndexRoute component={Home} />
           <Route path='/databases' component={Databases} />
           <Route path='/**/databases' component={Databases} />
+          <Route path='/**/info' component={DatabaseInfo} />
 
           <Route path='/classes' component={ClassForm}/>
           <Route path='/classes/:name' component={ClassInfo}/>
