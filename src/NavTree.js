@@ -16,28 +16,28 @@ export class NavTree extends Component {
     })
   }
   discoverKeyType(client) {
-    console.log("discoverKeyType", client)
+    // console.log("discoverKeyType", client)
     if (!client) return;
     client.query(q.Create(Ref("databases"), { name: "console_key_type_discovery_db_created_and_deleted_automatically_always_safe_to_delete" }))
       .then(()=>{
         // we are an admin key, lets fix our mess
-        console.log("admin key", client)
+        // console.log("admin key", client)
         return client.query(q.Delete(Ref("databases/console_key_type_discovery_db_created_and_deleted_automatically_always_safe_to_delete"))).then(()=>{
           this.setState({adminClient : client});
         })
       }, (error) => {
-        console.log("admin error", error)
+        // console.log("admin error", error)
         if (error.name === "PermissionDenied") {
           return client.query(q.Create(Ref("classes"), {
             name: "console_key_type_discovery_class_created_and_deleted_automatically_always_safe_to_delete"
           })).then(()=>{
             // we are a server key, lets fix our mess
-            console.log("server key", client)
+            // console.log("server key", client)
             return client.query(q.Delete(Ref("classes/console_key_type_discovery_class_created_and_deleted_automatically_always_safe_to_delete"))).then(()=>{
               this.setState({serverClient : client});
             })
           }, (error) => {
-            console.log("server error", error)
+            // console.log("server error", error)
             return client.query(q.Delete(Ref("classes/console_key_type_discovery_class_created_and_deleted_automatically_always_safe_to_delete")))
 
           })
@@ -57,7 +57,6 @@ export class NavTree extends Component {
     }
   }
   render() {
-    console.log("NavTree", this.state)
     if (this.state.serverClient || this.state.adminClient) {
       return (
         <div className="NavTree">

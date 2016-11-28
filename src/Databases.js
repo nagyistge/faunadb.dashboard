@@ -16,7 +16,6 @@ export class Databases extends Component {
     event.preventDefault();
     var path = this.props.params.splat;
     var client = this.props.client;
-    console.log(this.state)
     if (!client) return;
     var scopedClient;
     if (path) {
@@ -31,7 +30,6 @@ export class Databases extends Component {
     })
   }
   onChange(field, value) {
-    console.log("onChange", field, value)
     var form = this.state.form;
     form[field] = value;
     this.setState({form})

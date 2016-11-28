@@ -22,7 +22,6 @@ export class ClassInfo extends Component {
     }
   }
   getClassInfo(client, path, name) {
-    console.log("getClassInfo", client, path, name)
     if (!client) return;
     var scopedClient;
     if (path) {
@@ -37,7 +36,6 @@ export class ClassInfo extends Component {
     })
   }
   render() {
-    console.log("ClassInfo", this.state)
     const info = this.state.info;
     return (
         <div className="ClassInfo">
@@ -69,7 +67,6 @@ class ClassIndexes extends Component {
   }
   queryForIndexes(client, classRef) {
     var refName = classRef.value;
-    console.log("queryForIndexes", client, classRef)
     client && client.query(q.Filter(q.Map(q.Paginate(Ref("indexes")), function (indexRef) {
       return q.Get(indexRef)
     }), function (indexInstance) {
@@ -99,24 +96,20 @@ class InstanceForm extends Component {
     this.onSubmit = this.onSubmit.bind(this)
   }
   onChange(field, value) {
-    console.log("onChange", field, value)
     var form = this.state.form;
     form[field] = value;
     this.setState({form})
   }
   onSubmit(event) {
     event.preventDefault();
-    console.log("onSubmit", this.props, this.state.form.data)
     var data = JSON.parse(this.state.form.data);
     var createQuery = q.Create(this.props.info.ref, {
       data: data
     });
-    console.log(data, createQuery)
     this.props.client && this.props.client.query(createQuery)
   }
   render() {
     var context = this.props.path ? " in "+this.props.path : "";
-    console.log("InstanceForm", this.state, this.props)
     return (
       <div className="InstanceForm">
         <form>
@@ -144,7 +137,6 @@ export class ClassForm extends Component {
     event.preventDefault();
     var path = this.props.params.splat;
     var client = this.props.client;
-    console.log(this.state)
     if (!client) return;
     var scopedClient;
     if (path) {
@@ -159,14 +151,12 @@ export class ClassForm extends Component {
     }).catch(console.error.bind(console, "createClass error"))
   }
   onChange(field, value) {
-    console.log("onChange", field, value)
     var form = this.state.form;
     form[field] = value;
     this.setState({form})
   }
   render() {
     var context = this.props.params.splat ? " in "+this.props.params.splat : "";
-    console.log("ClassForm", this.state, this.props)
     return (
       <div className="ClassForm">
         <form>

@@ -14,7 +14,6 @@ export default class IndexQuery extends Component {
     this.state = {};
   }
   gotTerm(term) {
-    console.log("Got Term", term)
     this.setState({term})
   }
   render() {
@@ -56,7 +55,6 @@ class QueryResult extends Component {
     }
   }
   getIndexRows(client, name, term) {
-    // console.log("getIndexRows", client, name, term)
     if (!name) return;
     var query;
     if (term) {
@@ -65,7 +63,6 @@ class QueryResult extends Component {
       query = q.Paginate(q.Match(Ref("indexes/"+name)))
     }
     client && client.query(query).then((res) => {
-      // console.log("res", res)
       this.setState({data : this.makeResultIntoTableData(res)})
     }).catch(console.error.bind(console, name))
   }
@@ -95,7 +92,6 @@ class QueryResult extends Component {
   }
   clickedRef(item, event) {
     event.preventDefault()
-    console.log("clickedRef",item, this)
     if (item.constructor === q.Ref("").constructor) {
       this.setState({instanceRef:item});
     }

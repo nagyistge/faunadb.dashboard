@@ -133,7 +133,6 @@ export class IndexForm extends Component {
     }
   }
   getClasses(client, path) {
-    console.log("getClasses", client, path)
     if (!client) return;
     var scopedClient;
     if (path) {
@@ -144,7 +143,6 @@ export class IndexForm extends Component {
       scopedClient = client;
     }
     scopedClient.query(q.Paginate(Ref("classes"))).then( (res) => {
-      console.log("got", res);
       this.setState({classes : res.data})
     }).catch(console.error.bind(console, "getClasses"))
   }
@@ -153,7 +151,6 @@ export class IndexForm extends Component {
     event.preventDefault();
     var path = this.props.params.splat;
     var client = this.props.client;
-    console.log(this.state)
     if (!client) return;
     var scopedClient;
     if (path) {
@@ -184,7 +181,6 @@ export class IndexForm extends Component {
     return opts;
   }
   onChange(field, value) {
-    console.log("onChange", field, value)
     var form = this.state.form;
     form[field] = value;
     this.setState({form})
@@ -197,7 +193,6 @@ export class IndexForm extends Component {
   }
   render() {
     var context = this.props.params.splat ? " in "+this.props.params.splat : "";
-    console.log("IndexForm", this.state, this.props)
     var dropdownClasses = this.state.classes.map((ref)=>{
       return {
         key : ref.value,

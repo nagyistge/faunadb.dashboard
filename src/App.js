@@ -71,7 +71,6 @@ class Container extends Component {
     this.observerCallback = this.observerCallback.bind(this);
   }
   updateSecret(secret) {
-    console.log('Secret is: ' + secret);
     // get a new client for that secret and set state
     // observer for errors...
     var clientForSecret = new faunadb.Client({
@@ -95,7 +94,6 @@ class Container extends Component {
         }
         return {message, id : Math.random().toString()};
       })
-      console.log("messages", newErrors)
       // push them to the top of the list
       var oldErrors = this.state.errors;
       var allErrors = newErrors.concat(oldErrors);
@@ -111,8 +109,6 @@ class Container extends Component {
     }
   }
   render() {
-    console.log("Container", this.state)
-
     const childrenWithProps = React.Children.map(this.props.children,
      (child) => React.cloneElement(child, {
        client: this.state.client
