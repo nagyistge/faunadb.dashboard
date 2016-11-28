@@ -173,7 +173,7 @@ class TermForm extends Component {
   handleSubmit(event) {
     event.preventDefault();
     var value = this.state.value;
-    var match = value.match(/Ref\(\"(.*)\"\)/);
+    var match = value.match(/Ref\("(.*)"\)/);
     if (match) {
       value = q.Ref(match[1]);
     }

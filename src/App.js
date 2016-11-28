@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 import {TextField, Button, ButtonType, MessageBar, MessageBarType} from 'office-ui-fabric-react'
-import clientForSubDB from "./clientForSubDB";
 import faunadb from 'faunadb';
 import {IndexInfo, IndexForm} from './Indexes'
 import {ClassInfo, ClassForm} from './Classes'
@@ -12,31 +11,7 @@ import './App.css';
 
 const ERROR_MESSAGE_DISPLAY_MS = 5000;
 
-class App extends Component {
-  render() {
-    return (
-      <Router history={hashHistory}>
-        <Route path='/' component={Container}>
-          <IndexRoute component={Home} />
-          <Route path='/databases' component={Databases} />
-          <Route path='/**/databases' component={Databases} />
 
-          <Route path='/classes' component={ClassForm}/>
-          <Route path='/classes/:name' component={ClassInfo}/>
-          <Route path='/**/classes' component={ClassForm}/>
-          <Route path='/**/classes/:name' component={ClassInfo}/>
-
-          <Route path='/indexes' component={IndexForm}/>
-          <Route path='/indexes/:name' component={IndexInfo}/>
-          <Route path='/**/indexes' component={IndexForm}/>
-          <Route path='/**/indexes/:name' component={IndexInfo}/>
-
-          <Route path='*' component={NotFound} />
-        </Route>
-      </Router>
-    );
-  }
-}
 
 class SecretForm extends Component {
   constructor(props) {
@@ -141,11 +116,37 @@ class Container extends Component {
 }
 
 const Home = () =>(
-  <div>
-    To get started, enter a FaunaDB secret in the form.
-  </div>
+  <p>
+    To get started, enter a FaunaDB secret in the form and browse to a class or index.
+  </p>
 );
 
 const NotFound = () => (<h1>404.. This page is not found!</h1>);
+
+class App extends Component {
+  render() {
+    return (
+      <Router history={browserHistory}>
+        <Route path='/' component={Container}>
+          <IndexRoute component={Home} />
+          <Route path='/databases' component={Databases} />
+          <Route path='/**/databases' component={Databases} />
+
+          <Route path='/classes' component={ClassForm}/>
+          <Route path='/classes/:name' component={ClassInfo}/>
+          <Route path='/**/classes' component={ClassForm}/>
+          <Route path='/**/classes/:name' component={ClassInfo}/>
+
+          <Route path='/indexes' component={IndexForm}/>
+          <Route path='/indexes/:name' component={IndexInfo}/>
+          <Route path='/**/indexes' component={IndexForm}/>
+          <Route path='/**/indexes/:name' component={IndexInfo}/>
+
+          <Route path='*' component={NotFound} />
+        </Route>
+      </Router>
+    );
+  }
+}
 
 export default App;

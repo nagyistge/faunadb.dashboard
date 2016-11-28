@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
-import {TextField, NumberTextField, Button, ButtonType, Dropdown, Toggle} from 'office-ui-fabric-react'
+import {TextField, Button, ButtonType, Dropdown, Toggle} from 'office-ui-fabric-react'
 import faunadb from 'faunadb';
 import clientForSubDB from "./clientForSubDB";
-import {inspect} from 'util';
 import IndexQuery from './IndexQuery'
 const q = faunadb.query, Ref = q.Ref;
 
@@ -61,7 +60,7 @@ class IndexCard extends Component {
               Index: {info.name}
             </div>
             <div className="ms-Grid-col ms-u-sm6">
-              Source: <Link to={this.props.path ? this.props.path+"/"+info.source.value : info.source.value}>{info.source.value}</Link>
+              Source: <Link to={this.props.path ? "/"+this.props.path+"/"+info.source.value : info.source.value}>{info.source.value}</Link>
             </div>
           </div>
 

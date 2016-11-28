@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
-import {TextField, NumberTextField, Button, ButtonType} from 'office-ui-fabric-react'
+// import { Link } from 'react-router';
+import {TextField, Button, ButtonType} from 'office-ui-fabric-react'
 import clientForSubDB from "./clientForSubDB";
 import faunadb from 'faunadb';
 const q = faunadb.query, Ref = q.Ref;
