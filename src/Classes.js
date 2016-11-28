@@ -156,7 +156,7 @@ export class ClassForm extends Component {
     }
     scopedClient.query(q.Create(Ref("classes"), { name: this.state.form.name })).then( (res) => {
       console.log("created",res);
-    }).catch(console.log.bind(console, "createClass error"))
+    }).catch(console.error.bind(console, "createClass error"))
   }
   onChange(field, value) {
     console.log("onChange", field, value)

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Router, Route, Link, IndexRoute, hashHistory, browserHistory } from 'react-router';
-import {TextField, Button, ButtonType} from 'office-ui-fabric-react'
+import {TextField, Button, ButtonType, MessageBar, MessageBarType} from 'office-ui-fabric-react'
 import clientForSubDB from "./clientForSubDB";
 import faunadb from 'faunadb';
 import {IndexInfo, IndexForm} from './Indexes'
@@ -9,6 +9,8 @@ import {NavTree} from './NavTree'
 import {Databases} from './Databases'
 import logo from './logo.svg';
 import './App.css';
+
+const ERROR_MESSAGE_DISPLAY_MS = 5000;
 
 class App extends Component {
   render() {
@@ -64,16 +66,49 @@ class SecretForm extends Component {
 class Container extends Component {
   constructor(props) {
     super(props);
-    this.state = {client:false};
+    this.state = {client:false, errors:[]};
     this.updateSecret = this.updateSecret.bind(this);
+    this.observerCallback = this.observerCallback.bind(this);
   }
   updateSecret(secret) {
     console.log('Secret is: ' + secret);
     // get a new client for that secret and set state
+    // observer for errors...
     var clientForSecret = new faunadb.Client({
-      secret: secret
+      secret: secret,
+      observer : this.observerCallback
     });
     this.setState({client : clientForSecret});
+  }
+  observerCallback(res) { // render any error messages
+    if (res.responseContent.errors) {
+      console.error("observerCallback errors", res.responseContent.errors)
+      var newErrors = res.responseContent.errors.map((error) => {
+        var message = "";
+        if (error.description) {
+          message += error.description
+        }
+        if (error.failures) {
+          error.failures.forEach((failure) => {
+            message += " ("+ failure.field.join('.') +") " + failure.description
+          })
+        }
+        return {message, id : Math.random().toString()};
+      })
+      console.log("messages", newErrors)
+      // push them to the top of the list
+      var oldErrors = this.state.errors;
+      var allErrors = newErrors.concat(oldErrors);
+      this.setState({errors : allErrors})
+      // automatically remove them after a few seconds
+      setTimeout(()=>{
+        var removeIDs = newErrors.map((error) => error.id)
+        var prunedErrors = this.state.errors.filter((error)=>{
+          return !removeIDs.includes(error.id)
+        });
+        this.setState({errors : prunedErrors})
+      }, ERROR_MESSAGE_DISPLAY_MS)
+    }
   }
   render() {
     console.log("Container", this.state)
@@ -85,15 +120,22 @@ class Container extends Component {
     );
     return (
       <div className="ms-Grid ms-Fabric ms-font-m">
-        {/* header */} <div className="ms-Grid-row header">
-        <img src={logo} className="logo" alt="logo" />
+        {/* header */}
+        <div className="ms-Grid-row header">
+          <img src={logo} className="logo" alt="logo" />
         </div>
         <div className="ms-Grid-row">
-          {/* nav */}  <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4 sidebar">
+          {/* nav */}
+          <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4 sidebar">
             <NavTree client={this.state.client} />
             <SecretForm onSubmit={this.updateSecret} />
           </div>
-          {/* main */} <div className="ms-Grid-col ms-u-sm12 ms-u-md7 ms-u-lg8">
+          {/* main */}
+          <div className="ms-Grid-col ms-u-sm12 ms-u-md7 ms-u-lg8">
+            {this.state.errors.map((error)=>{
+              return (<MessageBar
+              messageBarType={ MessageBarType.error }>{error.message}</MessageBar>)
+            })}
             {childrenWithProps}
           </div>
         </div>

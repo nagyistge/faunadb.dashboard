@@ -10,6 +10,7 @@ export default function clientForSubDB(adminClient, db_name, type) {
     path = db_name
   }
   return new faunadb.Client({
+    observer : adminClient._observer,
     secret : secret + ":" + path + ":" + type
   })
 }
