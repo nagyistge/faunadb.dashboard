@@ -1,7 +1,6 @@
-# Developer Console for FaunaDB
+# Developer Dashboard for FaunaDB
 
-This console should eventually provide access to the entire Fauna API, but at
-first it will be narrowly focussed on a few screens and use cases.
+This dashboard should eventually provide access to the entire Fauna API as accesible to cloud users and developers at on-premise sites, but at first it will be narrowly focussed on a few screens and use cases. It will have a companion UI that is accesible to our cloud ops team, and to on-premise customer ops teams. Both will be shipped as part of the Fauna JAR. The Dev dashboard is where you land when you first join cloud.
 
 ## To Run in Development
 
@@ -11,7 +10,7 @@ is an admin secret but we support any type of secret by using capability detecti
 Clone this repo, install the dependencies, and launch the development server.
 
 ```sh
-git clone https://github.com/faunadb/console
+git clone https://github.com/faunadb/dashboard
 cd console
 npm install
 npm start
