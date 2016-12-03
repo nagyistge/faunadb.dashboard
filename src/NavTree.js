@@ -57,11 +57,13 @@ export class NavTree extends Component {
     }
   }
   render() {
+    console.log("NavTree",this.props);
+    var path = this.props.path ? this.props.path.split('/') : [];
     if (this.state.serverClient || this.state.adminClient) {
       return (
         <div className="NavTree">
           <h3>Data Navigator</h3>
-          <NavLevel name="/" serverClient={this.state.serverClient} adminClient={this.state.adminClient} expanded/>
+          <NavLevel name="/" path={path} serverClient={this.state.serverClient} adminClient={this.state.adminClient} expanded/>
         </div>
       );
     }
@@ -113,12 +115,17 @@ class NavLevel extends Component {
     this.setState({expanded : expanded})
   }
   render() {
-    // console.log("NavLevel",this.state.expanded)
+    console.log("NavLevel",this.props)
     if (!this.props.expanded) {
       return (<div className="NavLevel"></div>)
     }
+    var path = this.props.path;
+    var cname = "NavLevel";
+    if (this.props.highlighted){
+      cname += " highlighted"
+    }
     return (
-      <div className="NavLevel">
+      <div className={cname}>
         <dl>
           <dt key="_classes" >Classes [<Link to={this.props.name+"classes"}>+</Link>]</dt>
           {this.state.classes.map((classRow) => {
@@ -140,12 +147,20 @@ class NavLevel extends Component {
           {this.state.databases.map((db) => {
             // render db name at this level
             const db_name = this._valueTail(db.value);
+            var db_path = [], highlighted=false;
+            console.log("hl", db_name, path[0], db_name === path[0])
+            if (db_name === path[0]) {
+              db_path = path.slice(1);
+              highlighted=true;
+            }
             return (
               <dd key={db.value}>
                 <a href="#" onClick={this.toggleDB.bind(this, db.value)}>{!!this.state.expanded[db.value] ? "V" : ">"}</a>
-                &nbsp;<Link to={this.props.name+db_name+"/info"}>{db_name}</Link>
+                &nbsp;<Link className={highlighted&&"highlighted"} to={this.props.name+db_name+"/info"}>{db_name}</Link>
                 <NavLevel
                   name={this.props.name+db_name+"/"}
+                  path={db_path}
+                  highlighted={highlighted}
                   adminClient={clientForSubDB(this.props.adminClient, db_name, "admin")}
                   serverClient={clientForSubDB(this.props.adminClient, db_name, "server")}
                   expanded={!!this.state.expanded[db.value]}/>

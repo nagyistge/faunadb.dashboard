@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { Link, Router, Route, IndexRoute, browserHistory } from 'react-router';
 import {TextField, Button, ButtonType, MessageBar, MessageBarType} from 'office-ui-fabric-react'
 import faunadb from 'faunadb';
 import {IndexInfo, IndexForm} from './Indexes'
@@ -7,6 +7,7 @@ import {ClassInfo, ClassForm} from './Classes'
 import {NavTree} from './NavTree'
 import {Databases, DatabaseInfo} from './Databases'
 import logo from './logo.svg';
+import {parse as parseURL} from 'url'
 import './App.css';
 
 const ERROR_MESSAGE_DISPLAY_MS = 5000;
@@ -16,21 +17,27 @@ class SecretForm extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.state = {value:""};
+    this.state = {secret:""};
   }
-  handleChange(value) {
-    this.setState({value: value});
+  handleChange(key, value) {
+    var setter = {};
+    setter[key] = value;
+    this.setState(setter);
   }
   handleSubmit() {
-    this.props.onSubmit(this.state.value)
+    this.props.onSubmit(this.state)
   }
   render() {
     return (
       <div className="SecretForm">
-        <TextField type="password" label="Key Secret"
+        <TextField label="FaunaDB Endpoint URL"
+          description="Leave this empty for Fauna Cloud."
+          placeholder="https://cloud.faunadb.com/"
+          value={this.state.endpoint} onChanged={this.handleChange.bind(this,"endpoint")}/>
+        <TextField required type="password" label="Key Secret"
           description="Visit https://fauna.com/account/keys or talk to your administrator to provision keys."
-          value={this.state.value} onChanged={this.handleChange}/>
-        <Button buttonType={ ButtonType.primary } onClick={this.handleSubmit}>Set Secret</Button>
+          value={this.state.secret} onChanged={this.handleChange.bind(this,"secret")}/>
+        <Button buttonType={ ButtonType.primary } onClick={this.handleSubmit}>Use Secret</Button>
       </div>
     )
   }
@@ -43,13 +50,23 @@ class Container extends Component {
     this.updateSecret = this.updateSecret.bind(this);
     this.observerCallback = this.observerCallback.bind(this);
   }
-  updateSecret(secret) {
+  updateSecret(data) {
     // get a new client for that secret and set state
     // observer for errors...
-    var clientForSecret = new faunadb.Client({
-      secret: secret,
+    var opts = {
+      secret: data.secret,
       observer : this.observerCallback
-    });
+    };
+    if (data.endpoint) {
+      var endpointURL = parseURL(data.endpoint)
+      opts.domain = endpointURL.hostname
+      opts.scheme = endpointURL.protocol.replace(/:$/,'')
+      if (endpointURL.port) {
+        opts.port = endpointURL.port
+      }
+    }
+    // console.log("client", opts.secret, opts)
+    var clientForSecret = new faunadb.Client(opts);
     this.setState({client : clientForSecret});
   }
   observerCallback(res) { // render any error messages
@@ -87,16 +104,17 @@ class Container extends Component {
        client: this.state.client
      })
     );
+    var path = (this.props.params||{}).splat;
     return (
       <div className="ms-Grid ms-Fabric ms-font-m">
         {/* header */}
         <div className="ms-Grid-row header">
-          <img src={logo} className="logo" alt="logo" />
+          <Link to="/"><img src={logo} className="logo" alt="logo" /></Link>
         </div>
         <div className="ms-Grid-row">
           {/* nav */}
           <div className="ms-Grid-col ms-u-sm12 ms-u-md5 ms-u-lg4 sidebar">
-            <NavTree client={this.state.client} />
+            <NavTree client={this.state.client} path={path}/>
             <SecretForm onSubmit={this.updateSecret} />
           </div>
           {/* main */}

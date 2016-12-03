@@ -1,5 +1,5 @@
 import faunadb from 'faunadb';
-
+import {parse} from 'url'
 export default function clientForSubDB(adminClient, db_name, type) {
   var path, encoded = adminClient._secret,
     parts = encoded.split(":"),
@@ -9,8 +9,15 @@ export default function clientForSubDB(adminClient, db_name, type) {
   } else {
     path = db_name
   }
+  var newSecret = secret + ":" + path + ":" + type;
+  console.log("sub db client", newSecret, adminClient._baseUrl);
+  var baseUrl = parse(adminClient._baseUrl);
+// console.log(baseUrl)
   return new faunadb.Client({
+    domain : baseUrl.hostname,
+    port : baseUrl.port,
+    scheme : baseUrl.protocol.replace(':',''),
     observer : adminClient._observer,
-    secret : secret + ":" + path + ":" + type
+    secret : newSecret
   })
 }

@@ -145,6 +145,7 @@ export class ClassForm extends Component {
       // so we don't know our path and can't change our client
       scopedClient = client;
     }
+    console.log("make class", scopedClient);
     scopedClient.query(q.Create(Ref("classes"), { name: this.state.form.name })).then( (res) => {
       console.log("created",res);
     }).catch(console.error.bind(console, "createClass error"))

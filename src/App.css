@@ -11,3 +11,11 @@
 .sidebar {
   background-color: #f4f4f5;
 }
+
+a.highlighted {
+  background-color: #d9d9ec;
+}
+
+/*.NavTree.highlighted {
+  background-color: #9ff;
+}*/
