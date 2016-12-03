@@ -13,9 +13,24 @@
 }
 
 a.highlighted {
-  background-color: #d9d9ec;
+  background-color: rgba(230,235,255,0.5);
+  font-weight: bold;
 }
 
-/*.NavTree.highlighted {
-  background-color: #9ff;
-}*/
+div.NavLevel {
+  background-color: rgba(255,255,255,0.25);
+}
+
+div.NavLevel.highlighted {
+  background-color: rgba(230,235,255,0.25);
+}
+
+.NavTree dt {
+  margin-left:1em;
+}
+.NavTree dd {
+  margin-left:2em;
+}
+.NavTree dl {
+  margin:0;
+}

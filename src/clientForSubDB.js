@@ -10,9 +10,7 @@ export default function clientForSubDB(adminClient, db_name, type) {
     path = db_name
   }
   var newSecret = secret + ":" + path + ":" + type;
-  console.log("sub db client", newSecret, adminClient._baseUrl);
   var baseUrl = parse(adminClient._baseUrl);
-// console.log(baseUrl)
   return new faunadb.Client({
     domain : baseUrl.hostname,
     port : baseUrl.port,

@@ -57,7 +57,6 @@ export class NavTree extends Component {
     }
   }
   render() {
-    console.log("NavTree",this.props);
     var path = this.props.path ? this.props.path.split('/') : [];
     if (this.state.serverClient || this.state.adminClient) {
       return (
@@ -115,7 +114,7 @@ class NavLevel extends Component {
     this.setState({expanded : expanded})
   }
   render() {
-    console.log("NavLevel",this.props)
+    // console.log("NavLevel",this.props)
     if (!this.props.expanded) {
       return (<div className="NavLevel"></div>)
     }
@@ -129,17 +128,27 @@ class NavLevel extends Component {
         <dl>
           <dt key="_classes" >Classes [<Link to={this.props.name+"classes"}>+</Link>]</dt>
           {this.state.classes.map((classRow) => {
+            const name = this._valueTail(classRow.value);
+            var highlighted=false;
+            if (path[0] === "classes" && path[1] === name) {
+              highlighted=true
+            }
             return (
               <dd key={classRow.value}>
-                <Link to={this.props.name+classRow.value}>{this._valueTail(classRow.value)}</Link>
+                <Link className={highlighted&&"highlighted"} to={this.props.name+classRow.value}>{name}</Link>
               </dd>
             );
           })}
           <dt key="_indexes" >Indexes [<Link to={this.props.name+"indexes"}>+</Link>]</dt>
           {this.state.indexes.map((indexRow) => {
+            const name = this._valueTail(indexRow.value);
+            var highlighted=false;
+            if (path[0] === "indexes" && path[1] === name) {
+              highlighted=true
+            }
             return (
               <dd key={indexRow.value}>
-                <Link to={this.props.name+indexRow.value}>{this._valueTail(indexRow.value)}</Link>
+                <Link className={highlighted&&"highlighted"} to={this.props.name+indexRow.value}>{name}</Link>
               </dd>
             );
           })}
@@ -148,7 +157,6 @@ class NavLevel extends Component {
             // render db name at this level
             const db_name = this._valueTail(db.value);
             var db_path = [], highlighted=false;
-            console.log("hl", db_name, path[0], db_name === path[0])
             if (db_name === path[0]) {
               db_path = path.slice(1);
               highlighted=true;
@@ -156,7 +164,7 @@ class NavLevel extends Component {
             return (
               <dd key={db.value}>
                 <a href="#" onClick={this.toggleDB.bind(this, db.value)}>{!!this.state.expanded[db.value] ? "V" : ">"}</a>
-                &nbsp;<Link className={highlighted&&"highlighted"} to={this.props.name+db_name+"/info"}>{db_name}</Link>
+                &nbsp;<Link onClick={this.toggleDB.bind(this, db.value)} className={highlighted&&"highlighted"} to={this.props.name+db_name+"/info"}>{db_name}</Link>
                 <NavLevel
                   name={this.props.name+db_name+"/"}
                   path={db_path}

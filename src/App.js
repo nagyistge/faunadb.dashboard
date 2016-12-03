@@ -104,7 +104,8 @@ class Container extends Component {
        client: this.state.client
      })
     );
-    var path = (this.props.params||{}).splat;
+    // console.log("Container",this.props);
+    var path = (this.props.location||{}).pathname.replace("/",'');
     return (
       <div className="ms-Grid ms-Fabric ms-font-m">
         {/* header */}
