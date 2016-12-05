@@ -11,7 +11,7 @@ Clone this repo, install the dependencies, and launch the development server.
 
 ```sh
 git clone https://github.com/faunadb/dashboard
-cd console
+cd dashboard
 npm install
 npm start
 ```
